@@ -14,7 +14,7 @@
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.webdriver import ActionChains
 
-from horizon_autotests.pom.utils import Waiter
+from pom.utils import Waiter
 
 waiter = Waiter(polling=0.1)
 
