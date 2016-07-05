@@ -1,3 +1,9 @@
+"""
+Waiter.
+
+@author: chipiga86@gmail.com
+"""
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,11 +21,14 @@ import time
 
 
 class Waiter(object):
+    """Waiter."""
 
     def __init__(self, polling=0.05):
+        """Constructor."""
         self._polling = polling
 
     def exe(self, timeout, func, *args, **kwgs):
+        """Execute function with waiting successful result during timeout."""
         if not timeout:
             return func(*args, **kwgs) or False
         limit = int(time.time()) + timeout

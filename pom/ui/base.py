@@ -1,3 +1,9 @@
+"""
+Base UI element.
+
+@author: chipiga86@gmail.com
+"""
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,7 +26,7 @@ waiter = Waiter(polling=0.1)
 
 
 def wait_for_visibility(func):
-
+    """Decorator to wait for ui element will be visible."""
     def wrapper(self, *args, **kwgs):
         if not self.webelement.is_displayed():
             if not waiter.exe(5, lambda: self.is_visible):
@@ -31,7 +37,7 @@ def wait_for_visibility(func):
 
 
 def immediately(func):
-
+    """Decorator to off selenium implicit waiting."""
     def wrapper(self, *args, **kwgs):
         try:
             self.webdriver.implicitly_wait(0)
@@ -43,7 +49,7 @@ def immediately(func):
 
 
 def register_ui(**ui):
-
+    """Decorator to register ui elements of ui container."""
     def wrapper(cls):
         cls.register_ui(**ui)
         return cls
@@ -52,6 +58,7 @@ def register_ui(**ui):
 
 
 def cache(func):
+    """Decorator to cache instance method execution result."""
     attrname = '_cached_' + func.__name__
 
     def wrapper(self, *args, **kwgs):
@@ -65,14 +72,20 @@ def cache(func):
 
 
 class Container(object):
+    """Container, base class."""
 
     @classmethod
     def register_ui(cls, **ui):
+        """Register ui elements.
+
+        Sets ui elements as cached properties. Inside property it clones ui
+        element to provide safe-thread execution.
+        """
         for ui_name, ui_obj in ui.iteritems():
 
             def ui_getter(self, ui_obj=ui_obj):
                 ui_clone = ui_obj.clone()
-                ui_clone.set_container(self)
+                ui_clone.container = self
                 return ui_clone
 
             ui_getter.__name__ = ui_name
@@ -80,29 +93,38 @@ class Container(object):
             setattr(cls, ui_name, ui_getter)
 
     def __enter__(self):
+        """Allow use container as context manager for readable code."""
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """Exit from context manager."""
         pass
 
     def find_element(self, locator):
+        """Find DOM element inside container."""
         return self.webelement.find_element(*locator)
 
     def find_elements(self, locator):
+        """Find DOM elements inside container."""
         return self.webelement.find_elements(*locator)
 
 
 class WebElementProxy(object):
+    """Web element proxy is used to catch exceptions with webelement."""
 
     def __init__(self, webelement_getter):
+        """Constructor."""
         self._webelement_getter = webelement_getter
 
     def __getattr__(self, name):
+        """Execute web element methods and properties."""
+        def get_attr():
+            return getattr(self._webelement_getter(), name)
 
         try:
-            result = getattr(self._webelement_getter(), name)
+            result = get_attr()
         except StaleElementReferenceException:
-            result = getattr(self._webelement_getter(), name)
+            result = get_attr()
 
         if not callable(result):
             return result
@@ -111,41 +133,49 @@ class WebElementProxy(object):
             try:
                 return result(*args, **kwgs)
             except StaleElementReferenceException:
-                return getattr(self._webelement_getter(), name)(*args, **kwgs)
+                return get_attr()(*args, **kwgs)
 
         return method
 
 
 class UI(object):
+    """Base class of ui element."""
 
     container = None
 
     def __init__(self, *locator):
-        self.locator = locator
+        """Constructor.
 
-    def set_container(self, container):
-        self.container = container
+        Arguments:
+            - locator.
+        """
+        self.locator = locator
 
     @wait_for_visibility
     def click(self):
+        """Click ui element."""
         self.webelement.click()
 
     @wait_for_visibility
     def right_click(self):
+        """Right click ui element."""
         self._action_chains.context_click(self.webelement).perform()
 
     @wait_for_visibility
     def double_click(self):
+        """Double click ui element."""
         self._action_chains.double_click(self.webelement).perform()
 
     @property
     @wait_for_visibility
     def value(self):
+        """Get value of ui element."""
         return self.webelement.get_attribute('innerHTML').strip()
 
     @property
     @immediately
     def is_present(self):
+        """Define is ui element present."""
         try:
             self.webelement.is_displayed()
             return True
@@ -155,19 +185,23 @@ class UI(object):
     @property
     @immediately
     def is_enabled(self):
+        """Define is ui element enabled."""
         return self.webelement.is_enabled()
 
     @property
     @immediately
     def is_visible(self):
+        """Define is ui element visible."""
         return self.webelement.is_displayed()
 
     @property
     def webdriver(self):
+        """Get webdriver."""
         return self.container.webdriver
 
     @property
     def webelement(self):
+        """Get webelement."""
         return WebElementProxy(
             lambda: self.container.find_element(self.locator))
 
@@ -176,16 +210,19 @@ class UI(object):
         return ActionChains(self.webdriver)
 
     def clone(self):
+        """Clone ui element."""
         return self.__class__(*self.locator)
 
     def wait_for_presence(self, timeout=5):
+        """Wait for ui element presence."""
         if not waiter.exe(timeout, lambda: self.is_present):
             raise Exception("{!r} is absent".format(self.locator))
 
     def wait_for_absence(self, timeout=5):
+        """Wait for ui element absence."""
         if not waiter.exe(timeout, lambda: not self.is_present):
             raise Exception("{!r} is present".format(self.locator))
 
 
 class Block(UI, Container):
-    pass
+    """UI block is containerable ui element."""

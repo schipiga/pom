@@ -1,3 +1,9 @@
+"""
+POM table block.
+
+@author: chipiga86@gmail.com
+"""
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,25 +23,33 @@ from .base import Block
 
 
 class Row(Block):
+    """Row of table."""
 
     def cell(self, name):
+        """Get cell of table.
+
+        Arguments:
+            - name: string, name of column.
+        """
         position = self.container.columns[name]
         cell_selector = './/{}[{}]'.format(self.container.cell_tag, position)
         cell = Block(By.XPATH, cell_selector)
-        cell.set_container(self)
+        cell.container = self
         return cell
 
 
 class Table(Block):
+    """Table."""
 
-    Row = Row
+    row_cls = Row
     row_tag = "tr"
     cell_tag = "td"
     columns = None
 
     def row(self, **kwgs):
-        row = self.Row(By.XPATH, self._row_selector(**kwgs))
-        row.set_container(self)
+        """Get row of table."""
+        row = self.row_cls(By.XPATH, self._row_selector(**kwgs))
+        row.container = self
         return row
 
     def _row_selector(self, **kwgs):

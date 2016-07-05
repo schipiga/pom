@@ -1,3 +1,9 @@
+"""
+POM combobox.
+
+@author: chipiga86@gmail.com
+"""
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,19 +23,24 @@ from .base import UI
 
 
 class ComboBox(UI):
+    """Combobox."""
 
     @property
     def webelement(self):
+        """Combobox webelement."""
         return Select(super(ComboBox, self).webelement)
 
     @property
     def value(self):
+        """Combobox value."""
         return self.webelement.first_selected_option.text
 
     @value.setter
     def value(self, value):
+        """Set combobox value."""
         self.webelement.select_by_visible_text(value)
 
     @property
     def values(self):
+        """Combobox values."""
         return [o.text for o in self.webelement.options]

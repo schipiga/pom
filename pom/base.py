@@ -1,3 +1,9 @@
+"""
+POM base classes.
+
+@author: chipiga86@gmail.com
+"""
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,7 +26,6 @@ __all__ = [
     'Page'
 ]
 
-
 browsers = {
     'firefox': webdriver.Firefox,
     'phantom': webdriver.PhantomJS,
@@ -29,23 +34,33 @@ browsers = {
 
 
 class App(object):
+    """Web application."""
 
     def __init__(self, url, browser, *args, **kwgs):
+        """Constructor."""
         self.app_url = url.strip('/')
         self.webdriver = browsers[browser](*args, **kwgs)
 
     def open(self, url):
+        """Open url.
+
+        Arguments:
+            - url: string.
+        """
         self.webdriver.get(self.app_url + url)
 
     def quit(self):
+        """Close browser."""
         self.webdriver.quit()
 
 
 class Page(Container):
+    """Page of web application."""
 
     url = None
 
     def __init__(self, app):
+        """Constructor."""
         self.app = app
         self.webdriver = app.webdriver
         self.webelement = self.webdriver

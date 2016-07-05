@@ -1,3 +1,9 @@
+"""
+POM UI components.
+
+@author: chipiga86@gmail.com
+"""
+
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,10 +17,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .base import UI, Block, immediately, Container, register_ui  # noqa
-from .form import Form  # noqa
-from .text import TextField, IntegerField  # noqa
+from .base import Block, Container, immediately, register_ui, UI  # noqa
 from .button import Button  # noqa
-from .table import Row, Table  # noqa
 from .checkbox import CheckBox  # noqa
 from .combobox import ComboBox  # noqa
+from .form import Form  # noqa
+from .table import Row, Table  # noqa
+from .fields import IntegerField, TextField  # noqa
