@@ -26,7 +26,7 @@ class TextField(UI):
     @property
     def value(self):
         """Value of text field."""
-        return self.webelement.text
+        return self.webelement.text or self.webelement.get_attribute('value')
 
     @value.setter
     def value(self, text):
