@@ -19,28 +19,30 @@ POM combobox.
 
 from selenium.webdriver.support.ui import Select
 
-from .base import UI
+from .base import UI, wait_for_visibility
 
 
 class ComboBox(UI):
     """Combobox."""
 
     @property
-    def webelement(self):
-        """Combobox webelement."""
-        return Select(super(ComboBox, self).webelement)
-
-    @property
+    @wait_for_visibility
     def value(self):
         """Combobox value."""
-        return self.webelement.first_selected_option.text
+        return self._select.first_selected_option.text
 
     @value.setter
+    @wait_for_visibility
     def value(self, value):
         """Set combobox value."""
-        self.webelement.select_by_index(self.values.index(value))
+        self._select.select_by_index(self.values.index(value))
 
     @property
+    @wait_for_visibility
     def values(self):
         """Combobox values."""
-        return [o.text for o in self.webelement.options]
+        return [o.text for o in self._select.options]
+
+    @property
+    def _select(self):
+        return Select(self.webelement)

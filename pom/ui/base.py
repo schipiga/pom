@@ -17,7 +17,7 @@ Base UI element.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common import exceptions
 from selenium.webdriver import ActionChains
 
 from pom.utils import Waiter
@@ -115,16 +115,21 @@ class WebElementProxy(object):
     def __init__(self, webelement_getter):
         """Constructor."""
         self._webelement_getter = webelement_getter
+        self._cached_webelement = None
 
     def __getattr__(self, name):
         """Execute web element methods and properties."""
-        def get_attr():
-            return getattr(self._webelement_getter(), name)
+        def webelement_attr(self=self):
+            self._cached_webelement = self._cached_webelement or \
+                self._webelement_getter()
+            return getattr(self._cached_webelement, name)
 
         try:
-            result = get_attr()
-        except StaleElementReferenceException:
-            result = get_attr()
+            result = webelement_attr()
+        except (exceptions.StaleElementReferenceException,
+                exceptions.NoSuchElementException):
+            self._cached_webelement = None
+            result = webelement_attr()
 
         if not callable(result):
             return result
@@ -132,8 +137,10 @@ class WebElementProxy(object):
         def method(*args, **kwgs):
             try:
                 return result(*args, **kwgs)
-            except StaleElementReferenceException:
-                return get_attr()(*args, **kwgs)
+            except (exceptions.StaleElementReferenceException,
+                    exceptions.NoSuchElementException):
+                self._cached_webelement = None
+                return webelement_attr()(*args, **kwgs)
 
         return method
 
