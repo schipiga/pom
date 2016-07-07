@@ -64,3 +64,7 @@ class Page(Container):
         self.app = app
         self.webdriver = app.webdriver
         self.webelement = self.webdriver
+
+    def refresh(self):
+        """Refresh page."""
+        self.webdriver.refresh()
