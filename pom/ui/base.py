@@ -207,6 +207,7 @@ class UI(object):
         return self.container.webdriver
 
     @property
+    @cache
     def webelement(self):
         """Get webelement."""
         return WebElementProxy(
