@@ -38,7 +38,7 @@ class ComboBox(UI):
     @value.setter
     def value(self, value):
         """Set combobox value."""
-        self.webelement.select_by_visible_text(value)
+        self.webelement.select_by_index(self.values.index(value))
 
     @property
     def values(self):
