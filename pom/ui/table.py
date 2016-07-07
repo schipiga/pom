@@ -26,8 +26,13 @@ class Row(Block):
     """Row of table."""
 
     @property
+    def _cell_tag(self):
+        return self.container.cell_tag
+
+    @property
     def cells(self):
-        locator = By.XPATH, './/{}'.format(self.container.cell_tag)
+        """Cells of row."""
+        locator = By.XPATH, './/{}'.format(self._cell_tag)
         _cells = []
 
         for index, element in enumerate(self.find_elements(locator)):
@@ -45,23 +50,42 @@ class Row(Block):
             - name: string, name of column.
         """
         position = self.container.columns[name]
-        cell_selector = './/{}[{}]'.format(self.container.cell_tag, position)
+        cell_selector = './/{}[{}]'.format(self._cell_tag, position)
         cell = Block(By.XPATH, cell_selector)
         cell.container = self
         return cell
 
 
+class HeadRow(Row):
+    """Head row of table."""
+
+    @property
+    def _cell_tag(self):
+        return self.container.head_cell_tag
+
+
 class Table(Block):
     """Table."""
 
+    head_cls = HeadRow
     row_cls = Row
+    head_tag = "thead"
+    head_cell_tag = "th"
     body_tag = "tbody"
     row_tag = "tr"
     cell_tag = "td"
     columns = None
 
     @property
+    def head(self):
+        """Head of table."""
+        _head = self.head_cls(By.XPATH, './/{}'.format(self.head_tag))
+        _head.container = self
+        return _head
+
+    @property
     def rows(self):
+        """Visible rows of table."""
         locator = By.XPATH, './/{}//{}'.format(self.body_tag or '.',
                                                self.row_tag)
         _rows = []
