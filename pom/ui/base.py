@@ -223,12 +223,14 @@ class UI(object):
     def wait_for_presence(self, timeout=5):
         """Wait for ui element presence."""
         if not waiter.exe(timeout, lambda: self.is_present):
-            raise Exception("{!r} is absent".format(self.locator))
+            raise Exception("{!r} is still absent after {} sec".format(
+                self.locator, timeout))
 
     def wait_for_absence(self, timeout=5):
         """Wait for ui element absence."""
         if not waiter.exe(timeout, lambda: not self.is_present):
-            raise Exception("{!r} is present".format(self.locator))
+            raise Exception("{!r} is still present after {} sec".format(
+                self.locator, timeout))
 
 
 class Block(UI, Container):
