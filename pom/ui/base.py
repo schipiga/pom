@@ -150,13 +150,14 @@ class UI(object):
 
     container = None
 
-    def __init__(self, *locator):
+    def __init__(self, *locator, **index):
         """Constructor.
 
         Arguments:
             - locator.
         """
         self.locator = locator
+        self.index = index.get('index')
 
     @wait_for_visibility
     def click(self):
@@ -210,8 +211,15 @@ class UI(object):
     @cache
     def webelement(self):
         """Get webelement."""
-        return WebElementProxy(
-            lambda: self.container.find_element(self.locator))
+        if self.index:
+            webelement_getter = lambda self=self: \
+                self.container.find_elements(self.locator)[self.index]
+
+        else:
+            webelement_getter = lambda self=self: \
+                self.container.find_element(self.locator)
+
+        return WebElementProxy(webelement_getter)
 
     @property
     def _action_chains(self):

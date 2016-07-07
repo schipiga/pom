@@ -25,6 +25,19 @@ from .base import Block
 class Row(Block):
     """Row of table."""
 
+    @property
+    def cells(self):
+        locator = By.XPATH, './/{}'.format(self.container.cell_tag)
+        _cells = []
+
+        for index, element in enumerate(self.find_elements(locator)):
+            if element.is_displayed():
+                cell = Block(locator[0], locator[1], index=index)
+                cell.container = self
+                _cells.append(cell)
+
+        return _cells
+
     def cell(self, name):
         """Get cell of table.
 
@@ -42,9 +55,24 @@ class Table(Block):
     """Table."""
 
     row_cls = Row
+    body_tag = "tbody"
     row_tag = "tr"
     cell_tag = "td"
     columns = None
+
+    @property
+    def rows(self):
+        locator = By.XPATH, './/{}//{}'.format(self.body_tag or '.',
+                                               self.row_tag)
+        _rows = []
+
+        for index, element in enumerate(self.find_elements(locator)):
+            if element.is_displayed():
+                row = self.row_cls(locator[0], locator[1], index=index)
+                row.container = self
+                _rows.append(row)
+
+        return _rows
 
     def row(self, **kwgs):
         """Get row of table."""
@@ -60,4 +88,6 @@ class Table(Block):
             cell_selectors.append(
                 self.cell_tag + pos_tmpl.format(position, value))
 
-        return './/{}[{}]'.format(self.row_tag, " and ".join(cell_selectors))
+        return './/{}//{}[{}]'.format(self.body_tag or '.',
+                                      self.row_tag,
+                                      " and ".join(cell_selectors))
