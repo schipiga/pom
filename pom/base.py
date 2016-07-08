@@ -20,10 +20,12 @@ POM base classes.
 from selenium import webdriver
 
 from .ui import Container
+from .ui.base import cache
 
 __all__ = [
     'App',
-    'Page'
+    'Page',
+    'register_pages'
 ]
 
 browsers = {
@@ -31,6 +33,31 @@ browsers = {
     'phantom': webdriver.PhantomJS,
     'Chrome': webdriver.Chrome,
 }
+
+
+def camel2snake(string):
+    """Camel case to snake case converter."""
+    return ''.join('_{}'.format(s.lower()) if s.isupper() else s
+                   for s in string).strip('_')
+
+
+def register_pages(pages):
+    """Decorator to register pages in application."""
+    def wrapper(cls):
+        """Wrapper to register pages."""
+        for page in pages:
+            func_name = camel2snake(page.__name__)
+
+            def page_getter(self, page=page):
+                return page(self)
+
+            page_getter.__name__ = func_name
+            page_getter = property(cache(page_getter))
+            setattr(cls, func_name, page_getter)
+
+        return cls
+
+    return wrapper
 
 
 class App(object):
@@ -68,3 +95,7 @@ class Page(Container):
     def refresh(self):
         """Refresh page."""
         self.webdriver.refresh()
+
+    def open(self):
+        """Open page."""
+        self.app.open(self.url)
