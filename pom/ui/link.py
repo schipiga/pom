@@ -1,5 +1,5 @@
 """
-POM UI components.
+POM link.
 
 @author: chipiga86@gmail.com
 """
@@ -17,11 +17,13 @@ POM UI components.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .base import Block, Container, register_ui, UI  # noqa
-from .button import Button  # noqa
-from .checkbox import CheckBox  # noqa
-from .combobox import ComboBox  # noqa
-from .form import Form  # noqa
-from .link import Link  # noqa
-from .table import Row, Table  # noqa
-from .fields import IntegerField, TextField  # noqa
+from .base import UI
+
+
+class Link(UI):
+    """Link."""
+
+    @property
+    def href(self):
+        """URL of link."""
+        return self.webelement.get_attribute('href')
