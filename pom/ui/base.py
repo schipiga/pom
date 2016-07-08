@@ -227,7 +227,9 @@ class UI(object):
 
     def clone(self):
         """Clone ui element."""
-        return self.__class__(*self.locator)
+        return self.__class__(self.locator[0],
+                              self.locator[1],
+                              index=self.index)
 
     def wait_for_presence(self, timeout=5):
         """Wait for ui element presence."""

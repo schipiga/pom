@@ -19,79 +19,78 @@ POM table block.
 
 from selenium.webdriver.common.by import By
 
-from .base import Block
+from .base import Block, register_ui
 
 
-class Row(Block):
-    """Row of table."""
-
-    @property
-    def _cell_tag(self):
-        return self.container.cell_tag
+class _CellsMixin(object):
 
     @property
     def cells(self):
-        """Cells of row."""
-        locator = By.XPATH, './/{}'.format(self._cell_tag)
+        locator = By.XPATH, self.cell_xpath
         _cells = []
 
         for index, element in enumerate(self.find_elements(locator)):
             if element.is_displayed():
-                cell = Block(locator[0], locator[1], index=index)
+
+                cell = self.cell_cls(locator[0], locator[1], index=index)
                 cell.container = self
                 _cells.append(cell)
 
         return _cells
 
     def cell(self, name):
-        """Get cell of table.
-
-        Arguments:
-            - name: string, name of column.
-        """
-        position = self.container.columns[name]
-        cell_selector = './/{}[{}]'.format(self._cell_tag, position)
-        cell = Block(By.XPATH, cell_selector)
+        cell = self.cell_cls(By.XPATH, self._cell_selector(name))
         cell.container = self
         return cell
 
+    def _cell_selector(self, name):
+        position = self.container.columns[name]
 
-class HeadRow(Row):
-    """Head row of table."""
+        if self.cell_xpath.endswith(']'):
+            return (self.cell_xpath.rstrip(']') +
+                    ' and position()={}]'.format(position))
+        else:
+            return self.cell_xpath + '[{}]'.format(position)
+
+
+class Row(Block, _CellsMixin):
+    """Row of table."""
+
+    cell_cls = Block
+    cell_xpath = './/td'
+
+
+class Header(Block, _CellsMixin):
+    """Header of table."""
+
+    cell_cls = Block
+    cell_xpath = './/th'
+
+
+class Body(Block):
+    """Table body."""
+
+    row_xpath = './/tr'
 
     @property
-    def _cell_tag(self):
-        return self.container.head_cell_tag
-
-
-class Table(Block):
-    """Table."""
-
-    head_cls = HeadRow
-    row_cls = Row
-    head_tag = "thead"
-    head_cell_tag = "th"
-    body_tag = "tbody"
-    row_tag = "tr"
-    cell_tag = "td"
-    columns = None
+    def row_cls(self):
+        """Row table class."""
+        return self.container.row_cls
 
     @property
-    def head(self):
-        """Head of table."""
-        _head = self.head_cls(By.XPATH, './/{}'.format(self.head_tag))
-        _head.container = self
-        return _head
+    def columns(self):
+        """Table columns."""
+        return self.container.columns
 
     @property
     def rows(self):
         """Visible rows of table."""
-        locator = By.XPATH, './/{}//{}'.format(self.body_tag or '.',
-                                               self.row_tag)
+        locator = By.XPATH, self.row_xpath
         _rows = []
 
         for index, element in enumerate(self.find_elements(locator)):
             if element.is_displayed():
+
                 row = self.row_cls(locator[0], locator[1], index=index)
                 row.container = self
                 _rows.append(row)
@@ -107,11 +106,40 @@ class Table(Block):
     def _row_selector(self, **kwgs):
         pos_tmpl = '[position()={} and contains(., "{}")]'
         cell_selectors = []
+
         for name, value in kwgs.items():
             position = self.columns[name]
             cell_selectors.append(
-                self.cell_tag + pos_tmpl.format(position, value))
+                self.row_cls.cell_xpath + pos_tmpl.format(position, value))
 
-        return './/{}//{}[{}]'.format(self.body_tag or '.',
-                                      self.row_tag,
-                                      " and ".join(cell_selectors))
+        cell_selector = " and ".join(cell_selectors)
+
+        if self.row_xpath.endswith(']'):
+            return (self.row_xpath.rstrip(']') +
+                    ' and {}]'.format(cell_selector))
+        else:
+            return self.row_xpath + '[{}]'.format(cell_selector)
+
+
+class Footer(Block):
+    """Table footer."""
+
+
+@register_ui(
+    header=Header(By.TAG_NAME, 'thead'),
+    body=Body(By.TAG_NAME, 'tbody'),
+    footer=Footer(By.TAG_NAME, 'tfoot'))
+class Table(Block):
+    """Table."""
+
+    row_cls = Row
+    columns = None
+
+    @property
+    def rows(self):
+        """Table rows."""
+        return self.body.rows
+
+    def row(self, **kwgs):
+        """Get row of table."""
+        return self.body.row(**kwgs)
