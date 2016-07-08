@@ -35,6 +35,8 @@ class ComboBox(UI):
     @wait_for_visibility
     def value(self, value):
         """Set combobox value."""
+        if value == self.value:
+            return
         self._select.select_by_index(self.values.index(value))
 
     @property
