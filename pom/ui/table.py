@@ -22,6 +22,13 @@ from selenium.webdriver.common.by import By
 from .base import Block, register_ui
 
 
+def _merge_xpath(xpath, attr):
+    if xpath.endswith(']'):
+        return xpath[:-1] + ' and {}]'.format(attr)
+    else:
+        return xpath + '[{}]'.format(attr)
+
+
 class _CellsMixin(object):
 
     @property
@@ -45,12 +52,7 @@ class _CellsMixin(object):
 
     def _cell_selector(self, name):
         position = self.container.columns[name]
-
-        if self.cell_xpath.endswith(']'):
-            return (self.cell_xpath.rstrip(']') +
-                    ' and position()={}]'.format(position))
-        else:
-            return self.cell_xpath + '[{}]'.format(position)
+        return _merge_xpath(self.cell_xpath, 'position()=' + position)
 
 
 class Row(Block, _CellsMixin):
@@ -104,21 +106,18 @@ class Body(Block):
         return row
 
     def _row_selector(self, **kwgs):
-        pos_tmpl = '[position()={} and contains(., "{}")]'
+        pos_tmpl = 'position()={} and contains(., "{}")'
         cell_selectors = []
 
         for name, value in kwgs.items():
             position = self.columns[name]
-            cell_selectors.append(
-                self.row_cls.cell_xpath + pos_tmpl.format(position, value))
+            cell_xpath = _merge_xpath(self.row_cls.cell_xpath,
+                                      pos_tmpl.format(position, value))
+            cell_selectors.append(cell_xpath)
 
         cell_selector = " and ".join(cell_selectors)
 
-        if self.row_xpath.endswith(']'):
-            return (self.row_xpath.rstrip(']') +
-                    ' and {}]'.format(cell_selector))
-        else:
-            return self.row_xpath + '[{}]'.format(cell_selector)
+        return _merge_xpath(self.row_xpath, cell_selector)
 
 
 class Footer(Block):
