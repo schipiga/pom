@@ -24,4 +24,4 @@ from .combobox import ComboBox  # noqa
 from .form import Form  # noqa
 from .link import Link  # noqa
 from .table import Row, Table  # noqa
-from .fields import IntegerField, TextField  # noqa
+from .fields import FileField, IntegerField, TextField  # noqa

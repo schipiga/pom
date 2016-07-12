@@ -48,3 +48,18 @@ class IntegerField(UI):
         """Set value of integer field."""
         self.webelement.clear()
         self.webelement.send_keys(text)
+
+
+class FileField(UI):
+    """File field."""
+
+    @property
+    def value(self):
+        """Value of text field."""
+        return self.webelement.text
+
+    @value.setter
+    def value(self, text):
+        """Set value of text field."""
+        self.webelement.clear()
+        self.webelement.send_keys(text)
