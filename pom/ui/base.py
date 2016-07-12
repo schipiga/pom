@@ -28,9 +28,8 @@ waiter = Waiter(polling=0.1)
 def wait_for_visibility(func):
     """Decorator to wait for ui element will be visible."""
     def wrapper(self, *args, **kwgs):
-        if not self.webelement.is_displayed():
-            if not waiter.exe(5, lambda: self.is_visible):
-                raise Exception("{} is not visible", self.locator)
+        if not waiter.exe(10, lambda: self.is_visible):
+            raise Exception("{!r} is not visible after 10 sec", self)
         return func(self, *args, **kwgs)
 
     return wrapper
@@ -43,7 +42,7 @@ def immediately(func):
             self.webdriver.implicitly_wait(0)
             return func(self, *args, **kwgs)
         finally:
-            self.webdriver.implicitly_wait(5)
+            self.webdriver.implicitly_wait(10)
 
     return wrapper
 
@@ -159,6 +158,14 @@ class UI(object):
         self.locator = locator
         self.index = index.get('index')
 
+    @cache
+    def __repr__(self):
+        """Object representation."""
+        return self.__class__.__name__ + \
+            '(by={!r}'.format(self.locator[0]) + \
+            ', value={!r}'.format(self.locator[1]) + \
+            (')' if self.index is None else ', index={})'.format(self.index))
+
     @wait_for_visibility
     def click(self):
         """Click ui element."""
@@ -235,13 +242,13 @@ class UI(object):
         """Wait for ui element presence."""
         if not waiter.exe(timeout, lambda: self.is_present):
             raise Exception("{!r} is still absent after {} sec".format(
-                self.locator, timeout))
+                self, timeout))
 
     def wait_for_absence(self, timeout=5):
         """Wait for ui element absence."""
         if not waiter.exe(timeout, lambda: not self.is_present):
             raise Exception("{!r} is still present after {} sec".format(
-                self.locator, timeout))
+                self, timeout))
 
 
 class Block(UI, Container):
