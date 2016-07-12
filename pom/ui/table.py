@@ -52,7 +52,7 @@ class _CellsMixin(object):
 
     def _cell_selector(self, name):
         position = self.container.columns[name]
-        return _merge_xpath(self.cell_xpath, 'position()=' + position)
+        return _merge_xpath(self.cell_xpath, 'position()={}'.format(position))
 
 
 class Row(Block, _CellsMixin):
