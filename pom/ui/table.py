@@ -72,12 +72,15 @@ class Header(Block, _CellsMixin):
 class Body(Block):
     """Table body."""
 
-    row_xpath = './/tr'
-
     @property
     def row_cls(self):
         """Row table class."""
         return self.container.row_cls
+
+    @property
+    def row_xpath(self):
+        """Row xpath."""
+        return self.container.row_xpath
 
     @property
     def columns(self):
@@ -132,6 +135,7 @@ class Table(Block):
     """Table."""
 
     row_cls = Row
+    row_xpath = './/tr'
     columns = None
 
     @property
