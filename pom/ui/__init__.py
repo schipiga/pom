@@ -23,5 +23,5 @@ from .checkbox import CheckBox  # noqa
 from .combobox import ComboBox  # noqa
 from .form import Form  # noqa
 from .link import Link  # noqa
-from .table import Row, Table  # noqa
+from .table import List, Row, Table  # noqa
 from .fields import FileField, IntegerField, TextField  # noqa

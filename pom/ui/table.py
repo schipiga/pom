@@ -142,3 +142,33 @@ class Table(Block):
     def row(self, **kwgs):
         """Get row of table."""
         return self.body.row(**kwgs)
+
+
+class List(Block):
+    """List."""
+
+    row_cls = Row
+    row_xpath = ".//li"
+
+    @property
+    def rows(self):
+        """Visible rows of table."""
+        locator = By.XPATH, self.row_xpath
+        _rows = []
+
+        for index, element in enumerate(self.find_elements(locator)):
+            if element.is_displayed():
+
+                row = self.row_cls(locator[0], locator[1], index=index)
+                row.container = self
+                _rows.append(row)
+
+        return _rows
+
+    def row(self, content):
+        """Get row of table."""
+        xpath = _merge_xpath(self.row_xpath,
+                             'contains(., "{}")'.format(content))
+        row = self.row_cls(By.XPATH, xpath)
+        row.container = self
+        return row
