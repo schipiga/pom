@@ -35,9 +35,17 @@ class ComboBox(UI):
     @wait_for_visibility
     def value(self, value):
         """Set combobox value."""
-        if value == self.value:
+        if value in self.value:
             return
-        self._select.select_by_index(self.values.index(value))
+
+        for i, v in enumerate(self.values):
+            if value in v:
+                break
+        else:
+            raise Exception(
+                '{!r} is absent among {} values'.format(value, self))
+
+        self._select.select_by_index(i)
 
     @property
     @wait_for_visibility
