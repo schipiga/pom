@@ -23,13 +23,14 @@ from selenium.webdriver import ActionChains
 from pom.utils import Waiter
 
 waiter = Waiter(polling=0.1)
+presence_errors = (exceptions.StaleElementReferenceException,
+                   exceptions.NoSuchElementException)
 
 
-def wait_for_visibility(func):
-    """Decorator to wait for ui element will be visible."""
+def wait_for_presence(func):
+    """Decorator to wait for ui element will be present at display."""
     def wrapper(self, *args, **kwgs):
-        if not waiter.exe(10, lambda: self.is_visible):
-            raise Exception("{!r} is not visible after 10 sec", self)
+        self.wait_for_presence()
         return func(self, *args, **kwgs)
 
     return wrapper
@@ -125,8 +126,7 @@ class WebElementProxy(object):
 
         try:
             result = webelement_attr()
-        except (exceptions.StaleElementReferenceException,
-                exceptions.NoSuchElementException):
+        except presence_errors:
             self._cached_webelement = None
             result = webelement_attr()
 
@@ -136,8 +136,7 @@ class WebElementProxy(object):
         def method(*args, **kwgs):
             try:
                 return result(*args, **kwgs)
-            except (exceptions.StaleElementReferenceException,
-                    exceptions.NoSuchElementException):
+            except presence_errors:
                 self._cached_webelement = None
                 return webelement_attr()(*args, **kwgs)
 
@@ -166,23 +165,23 @@ class UI(object):
             ', value={!r}'.format(self.locator[1]) + \
             (')' if self.index is None else ', index={})'.format(self.index))
 
-    @wait_for_visibility
+    @wait_for_presence
     def click(self):
         """Click ui element."""
         self.webelement.click()
 
-    @wait_for_visibility
+    @wait_for_presence
     def right_click(self):
         """Right click ui element."""
         self._action_chains.context_click(self.webelement).perform()
 
-    @wait_for_visibility
+    @wait_for_presence
     def double_click(self):
         """Double click ui element."""
         self._action_chains.double_click(self.webelement).perform()
 
     @property
-    @wait_for_visibility
+    @wait_for_presence
     def value(self):
         """Get value of ui element."""
         return self.webelement.get_attribute('innerHTML').strip()
@@ -190,11 +189,10 @@ class UI(object):
     @property
     @immediately
     def is_present(self):
-        """Define is ui element present."""
+        """Define is ui element present at display."""
         try:
-            self.webelement.is_displayed()
-            return True
-        except Exception:
+            return self.webelement.is_displayed()
+        except presence_errors:
             return False
 
     @property
@@ -202,12 +200,6 @@ class UI(object):
     def is_enabled(self):
         """Define is ui element enabled."""
         return self.webelement.is_enabled()
-
-    @property
-    @immediately
-    def is_visible(self):
-        """Define is ui element visible."""
-        return self.webelement.is_displayed()
 
     @property
     def webdriver(self):

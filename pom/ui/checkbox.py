@@ -17,7 +17,7 @@ POM checkbox.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .base import UI, immediately, wait_for_visibility
+from .base import UI, immediately, wait_for_presence
 
 
 class CheckBox(UI):
@@ -29,13 +29,13 @@ class CheckBox(UI):
         """Define is checkbox selected."""
         return self.webelement.is_selected()
 
-    @wait_for_visibility
+    @wait_for_presence
     def select(self):
         """Select checkbox if it isn't selected."""
         if not self.is_selected:
             self.webelement.click()
 
-    @wait_for_visibility
+    @wait_for_presence
     def unselect(self):
         """Unselect checkbox if it is selected."""
         if self.is_selected:
