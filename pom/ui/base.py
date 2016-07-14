@@ -168,6 +168,11 @@ class UI(object):
         """Double click ui element."""
         self._action_chains.double_click(self.webelement).perform()
 
+    @wait_for_presence
+    def get_attribute(self, attr_name):
+        """Get attribute of ui element."""
+        return self.webelement.get_attribute(attr_name)
+
     @property
     @wait_for_presence
     def value(self):
