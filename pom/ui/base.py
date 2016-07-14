@@ -236,3 +236,13 @@ class UI(object):
 
 class Block(UI, Container):
     """UI block is containerable ui element."""
+
+    @wait_for_presence
+    def find_element(self, locator):
+        """Find DOM element inside container."""
+        return super(Block, self).find_element(locator)
+
+    @wait_for_presence
+    def find_elements(self, locator):
+        """Find DOM elements inside container."""
+        return super(Block, self).find_elements(locator)
