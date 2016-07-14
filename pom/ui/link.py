@@ -17,13 +17,14 @@ POM link.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .base import UI
+from .base import UI, wait_for_presence
 
 
 class Link(UI):
     """Link."""
 
     @property
+    @wait_for_presence
     def href(self):
         """URL of link."""
         return self.webelement.get_attribute('href')

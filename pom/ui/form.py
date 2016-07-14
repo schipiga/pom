@@ -17,12 +17,13 @@ POM form block.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .base import Block
+from .base import Block, wait_for_presence
 
 
 class Form(Block):
     """Form."""
 
+    @wait_for_presence
     def submit(self):
         """Submit form."""
         self.webelement.submit()

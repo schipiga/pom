@@ -17,14 +17,13 @@ POM checkbox.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .base import UI, immediately, wait_for_presence
+from .base import UI, wait_for_presence
 
 
 class CheckBox(UI):
     """Checkbox."""
 
     @property
-    @immediately
     def is_selected(self):
         """Define is checkbox selected."""
         return self.webelement.is_selected()

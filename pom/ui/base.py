@@ -36,18 +36,6 @@ def wait_for_presence(func):
     return wrapper
 
 
-def immediately(func):
-    """Decorator to off selenium implicit waiting."""
-    def wrapper(self, *args, **kwgs):
-        try:
-            self.webdriver.implicitly_wait(0)
-            return func(self, *args, **kwgs)
-        finally:
-            self.webdriver.implicitly_wait(10)
-
-    return wrapper
-
-
 def register_ui(**ui):
     """Decorator to register ui elements of ui container."""
     def wrapper(cls):
@@ -187,7 +175,6 @@ class UI(object):
         return self.webelement.get_attribute('innerHTML').strip()
 
     @property
-    @immediately
     def is_present(self):
         """Define is ui element present at display."""
         try:
@@ -196,7 +183,6 @@ class UI(object):
             return False
 
     @property
-    @immediately
     def is_enabled(self):
         """Define is ui element enabled."""
         return self.webelement.is_enabled()
@@ -230,13 +216,13 @@ class UI(object):
                               self.locator[1],
                               index=self.index)
 
-    def wait_for_presence(self, timeout=5):
+    def wait_for_presence(self, timeout=10):
         """Wait for ui element presence."""
         if not waiter.exe(timeout, lambda: self.is_present):
             raise Exception("{!r} is still absent after {} sec".format(
                 self, timeout))
 
-    def wait_for_absence(self, timeout=5):
+    def wait_for_absence(self, timeout=10):
         """Wait for ui element absence."""
         if not waiter.exe(timeout, lambda: not self.is_present):
             raise Exception("{!r} is still present after {} sec".format(

@@ -17,7 +17,7 @@ POM UI components.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .base import Block, Container, register_ui, UI  # noqa
+from .base import Block, Container, register_ui, UI, wait_for_presence  # noqa
 from .button import Button  # noqa
 from .checkbox import CheckBox  # noqa
 from .combobox import ComboBox  # noqa
