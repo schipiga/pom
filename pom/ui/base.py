@@ -59,7 +59,7 @@ def register_ui(**ui):
 
 def cache(func):
     """Decorator to cache instance method execution result."""
-    attrname = '_cached_' + func.__name__
+    attrname = '_cached_{}_{}'.format(func.__name__, id(func))
 
     def wrapper(self, *args, **kwgs):
         result = getattr(self, attrname, None)
