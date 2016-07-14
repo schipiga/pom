@@ -99,3 +99,11 @@ class Page(Container):
     def open(self):
         """Open page."""
         self.app.open(self.url)
+
+    def forward(self):
+        """Forward."""
+        self.webdriver.forward()
+
+    def back(self):
+        """Back."""
+        self.webdriver.back()
