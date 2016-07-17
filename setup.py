@@ -21,6 +21,7 @@ setup(
     licence='GPLv2',
     packages=['pom'],
     install_requires=[
-        'selenium'
+        'selenium',
+        'waiting',
     ]
 )

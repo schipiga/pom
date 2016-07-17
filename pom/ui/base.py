@@ -19,10 +19,8 @@ Base UI element.
 
 from selenium.common import exceptions
 from selenium.webdriver import ActionChains
+from waiting import TimeoutExpired, wait
 
-from pom.utils import Waiter
-
-waiter = Waiter(polling=0.1)
 presence_errors = (exceptions.StaleElementReferenceException,
                    exceptions.NoSuchElementException)
 
@@ -223,15 +221,21 @@ class UI(object):
 
     def wait_for_presence(self, timeout=10):
         """Wait for ui element presence."""
-        if not waiter.exe(timeout, lambda: self.is_present):
-            raise Exception("{!r} is still absent after {} sec".format(
-                self, timeout))
+        try:
+            wait(lambda: self.is_present,
+                 timeout_seconds=timeout, sleep_seconds=0.1)
+        except TimeoutExpired:
+            raise Exception(
+                "{!r} is still absent after {} sec".format(self, timeout))
 
     def wait_for_absence(self, timeout=10):
         """Wait for ui element absence."""
-        if not waiter.exe(timeout, lambda: not self.is_present):
-            raise Exception("{!r} is still present after {} sec".format(
-                self, timeout))
+        try:
+            wait(lambda: not self.is_present,
+                 timeout_seconds=timeout, sleep_seconds=0.1)
+        except TimeoutExpired:
+            raise Exception(
+                "{!r} is still present after {} sec".format(self, timeout))
 
 
 class Block(UI, Container):
