@@ -19,7 +19,7 @@ POM table block.
 
 from selenium.webdriver.common.by import By
 
-from .base import Block, register_ui, wait_for_presence
+from .base import Block, register_ui
 
 
 def _merge_xpath(xpath, attr):
