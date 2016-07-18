@@ -133,6 +133,7 @@ class UI(object):
     """Base class of ui element."""
 
     container = None
+    timeout = 10
 
     def __init__(self, *locator, **index):
         """Constructor.
@@ -219,8 +220,9 @@ class UI(object):
                               self.locator[1],
                               index=self.index)
 
-    def wait_for_presence(self, timeout=10):
+    def wait_for_presence(self, timeout=None):
         """Wait for ui element presence."""
+        timeout = timeout or self.timeout
         try:
             wait(lambda: self.is_present,
                  timeout_seconds=timeout, sleep_seconds=0.1)
@@ -228,8 +230,9 @@ class UI(object):
             raise Exception(
                 "{!r} is still absent after {} sec".format(self, timeout))
 
-    def wait_for_absence(self, timeout=10):
+    def wait_for_absence(self, timeout=None):
         """Wait for ui element absence."""
+        timeout = timeout or self.timeout
         try:
             wait(lambda: not self.is_present,
                  timeout_seconds=timeout, sleep_seconds=0.1)
