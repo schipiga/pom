@@ -20,7 +20,7 @@ POM base classes.
 from selenium import webdriver
 
 from .ui import Container
-from .ui.base import cache
+from .utils import cache, timeit
 
 __all__ = [
     'App',
@@ -92,18 +92,22 @@ class Page(Container):
         self.webdriver = app.webdriver
         self.webelement = self.webdriver
 
+    @timeit
     def refresh(self):
         """Refresh page."""
         self.webdriver.refresh()
 
+    @timeit
     def open(self):
         """Open page."""
         self.app.open(self.url)
 
+    @timeit
     def forward(self):
         """Forward."""
         self.webdriver.forward()
 
+    @timeit
     def back(self):
         """Back."""
         self.webdriver.back()

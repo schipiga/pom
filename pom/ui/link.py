@@ -18,12 +18,14 @@ POM link.
 # limitations under the License.
 
 from .base import UI, wait_for_presence
+from ..utils import timeit
 
 
 class Link(UI):
     """Link."""
 
     @property
+    @timeit
     @wait_for_presence
     def href(self):
         """URL of link."""

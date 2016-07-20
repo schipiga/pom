@@ -20,18 +20,21 @@ POM combobox.
 from selenium.webdriver.support.ui import Select
 
 from .base import UI, wait_for_presence
+from ..utils import timeit
 
 
 class ComboBox(UI):
     """Combobox."""
 
     @property
+    @timeit
     @wait_for_presence
     def value(self):
         """Combobox value."""
         return self._select.first_selected_option.text
 
     @value.setter
+    @timeit
     @wait_for_presence
     def value(self, value):
         """Set combobox value."""
@@ -48,6 +51,7 @@ class ComboBox(UI):
         self._select.select_by_index(i)
 
     @property
+    @timeit
     @wait_for_presence
     def values(self):
         """Combobox values."""

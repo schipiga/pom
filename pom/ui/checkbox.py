@@ -18,16 +18,20 @@ POM checkbox.
 # limitations under the License.
 
 from .base import UI, wait_for_presence
+from ..utils import timeit
 
 
 class CheckBox(UI):
     """Checkbox."""
 
     @property
+    @timeit
+    @wait_for_presence
     def is_selected(self):
         """Define is checkbox selected."""
         return self.webelement.is_selected()
 
+    @timeit
     @wait_for_presence
     def select(self):
         """Select checkbox if it isn't selected."""

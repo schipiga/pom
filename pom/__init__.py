@@ -18,3 +18,4 @@ Page Object Model.
 # limitations under the License.
 
 from .base import *  # noqa
+from .utils import *  # noqa

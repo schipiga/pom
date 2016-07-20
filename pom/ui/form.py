@@ -18,11 +18,13 @@ POM form block.
 # limitations under the License.
 
 from .base import Block, wait_for_presence
+from ..utils import timeit
 
 
 class Form(Block):
     """Form."""
 
+    @timeit
     @wait_for_presence
     def submit(self):
         """Submit form."""

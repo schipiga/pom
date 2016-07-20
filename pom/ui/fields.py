@@ -18,18 +18,21 @@ POM Fields.
 # limitations under the License.
 
 from .base import UI, wait_for_presence
+from ..utils import timeit
 
 
 class TextField(UI):
     """Text field."""
 
     @property
+    @timeit
     @wait_for_presence
     def value(self):
         """Value of text field."""
         return self.webelement.text or self.webelement.get_attribute('value')
 
     @value.setter
+    @timeit
     @wait_for_presence
     def value(self, text):
         """Set value of text field."""
@@ -41,12 +44,14 @@ class IntegerField(UI):
     """Integer field."""
 
     @property
+    @timeit
     @wait_for_presence
     def value(self):
         """Value of integer field."""
         return self.webelement.get_attribute('value')
 
     @value.setter
+    @timeit
     @wait_for_presence
     def value(self, text):
         """Set value of integer field."""
@@ -58,12 +63,14 @@ class FileField(UI):
     """File field."""
 
     @property
+    @timeit
     @wait_for_presence
     def value(self):
         """Value of text field."""
         return self.webelement.text
 
     @value.setter
+    @timeit
     @wait_for_presence
     def value(self, text):
         """Set value of text field."""

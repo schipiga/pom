@@ -20,6 +20,7 @@ POM table block.
 from selenium.webdriver.common.by import By
 
 from .base import Block, register_ui
+from ..utils import timeit
 
 
 def _merge_xpath(xpath, attr):
@@ -32,6 +33,7 @@ def _merge_xpath(xpath, attr):
 class _CellsMixin(object):
 
     @property
+    @timeit
     def cells(self):
         locator = By.XPATH, self.cell_xpath
         _cells = []
@@ -88,6 +90,7 @@ class Body(Block):
         return self.container.columns
 
     @property
+    @timeit
     def rows(self):
         """Visible rows of table."""
         locator = By.XPATH, self.row_xpath
@@ -155,6 +158,7 @@ class List(Block):
     row_xpath = ".//li"
 
     @property
+    @timeit
     def rows(self):
         """Visible rows of table."""
         locator = By.XPATH, self.row_xpath
