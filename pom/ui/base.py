@@ -17,7 +17,8 @@ Base UI element.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from functools import wraps
+import functools
+import logging
 
 from selenium.common import exceptions
 from selenium.webdriver import ActionChains
@@ -25,13 +26,14 @@ from waiting import TimeoutExpired, wait
 
 from ..utils import cache, timeit
 
+LOGGER = logging.getLogger(__name__)
 PRESENCE_ERRORS = (exceptions.StaleElementReferenceException,
                    exceptions.NoSuchElementException)
 
 
 def wait_for_presence(func):
     """Decorator to wait for ui element will be present at display."""
-    @wraps(func)
+    @functools.wraps(func)
     def wrapper(self, *args, **kwgs):
         self.wait_for_presence()
         return func(self, *args, **kwgs)
@@ -89,10 +91,11 @@ class Container(object):
 class WebElementProxy(object):
     """Web element proxy is used to catch exceptions with webelement."""
 
-    def __init__(self, webelement_getter):
+    def __init__(self, webelement_getter, ui_info):
         """Constructor."""
         self._webelement_getter = webelement_getter
         self._cached_webelement = None
+        self._ui_info = ui_info
 
     def __getattr__(self, name):
         """Execute web element methods and properties."""
@@ -104,6 +107,8 @@ class WebElementProxy(object):
         try:
             result = webelement_attr()
         except PRESENCE_ERRORS:
+            LOGGER.warn("{} isn't present in DOM. Cache is flushed.".format(
+                self._ui_info))
             self._cached_webelement = None
             result = webelement_attr()
 
@@ -114,6 +119,9 @@ class WebElementProxy(object):
             try:
                 return result(*args, **kwgs)
             except PRESENCE_ERRORS:
+                LOGGER.warn(
+                    "{} isn't present in DOM. Cache is flushed.".format(
+                        self._ui_info))
                 self._cached_webelement = None
                 return webelement_attr()(*args, **kwgs)
 
@@ -206,7 +214,7 @@ class UI(object):
             webelement_getter = lambda self=self: \
                 self.container.find_element(self.locator)
 
-        return WebElementProxy(webelement_getter)
+        return WebElementProxy(webelement_getter, ui_info=repr(self))
 
     @property
     def _action_chains(self):

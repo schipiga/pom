@@ -17,6 +17,8 @@ POM base classes.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+
 from selenium import webdriver
 
 from .ui import Container
@@ -27,6 +29,8 @@ __all__ = [
     'Page',
     'register_pages'
 ]
+
+LOGGER = logging.getLogger(__name__)
 
 browsers = {
     'firefox': webdriver.Firefox,
@@ -66,6 +70,7 @@ class App(object):
     def __init__(self, url, browser, *args, **kwgs):
         """Constructor."""
         self.app_url = url.strip('/')
+        LOGGER.info('Start {!r} browser'.format(browser))
         self.webdriver = browsers[browser](*args, **kwgs)
 
     def open(self, url):
@@ -78,6 +83,7 @@ class App(object):
 
     def quit(self):
         """Close browser."""
+        LOGGER.info('Close browser')
         self.webdriver.quit()
 
 

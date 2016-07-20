@@ -17,9 +17,9 @@ POM utils.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import functools
+import logging
 import time
-from functools import wraps
-from logging import getLogger
 
 __all__ = [
     'cache',
@@ -27,15 +27,15 @@ __all__ = [
     'timeit'
 ]
 
-TIMEIT_LOG = getLogger('timeit')
-POM_LOG = getLogger('pom')
+TIMEIT_LOG = logging.getLogger('timeit')
+LOGGER = logging.getLogger(__name__)
 
 
 def cache(func):
     """Decorator to cache instance method execution result."""
     attrname = '_cached_{}_{}'.format(func.__name__, id(func))
 
-    @wraps(func)
+    @functools.wraps(func)
     def wrapper(self, *args, **kwgs):
         result = getattr(self, attrname, None)
         if not result:
@@ -49,7 +49,7 @@ def cache(func):
 def timeit(type_name):
     """Decorator to log function execution time."""
     def decorator(func):
-        @wraps(func)
+        @functools.wraps(func)
         def wrapper(*args, **kwgs):
             start = time.time()
             try:
@@ -74,5 +74,5 @@ def timeit(type_name):
 
 def sleep(seconds, message):
     """Sleep with message."""
-    POM_LOG.warn('Sleep {}: {!r}'.format(seconds, message))
+    LOGGER.warn('Sleep {} second(s): {!r}'.format(seconds, message))
     time.sleep(seconds)
