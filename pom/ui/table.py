@@ -20,7 +20,7 @@ POM table block.
 from selenium.webdriver.common.by import By
 
 from .base import Block, register_ui
-from ..utils import timeit
+from ..utils import timeit, cache
 
 
 def _merge_xpath(xpath, attr):
@@ -57,6 +57,25 @@ class _CellsMixin(object):
         return _merge_xpath(self.cell_xpath, 'position()={}'.format(position))
 
 
+class _RowsMixin(object):
+
+    @property
+    @timeit
+    def rows(self):
+        """Visible rows."""
+        locator = By.XPATH, self.row_xpath
+        _rows = []
+
+        for index, element in enumerate(self.find_elements(locator)):
+            if element.is_displayed():
+
+                row = self.row_cls(locator[0], locator[1], index=index)
+                row.container = self
+                _rows.append(row)
+
+        return _rows
+
+
 class Row(Block, _CellsMixin):
     """Row of table."""
 
@@ -71,39 +90,26 @@ class Header(Block, _CellsMixin):
     cell_xpath = './/th'
 
 
-class Body(Block):
+class Body(Block, _RowsMixin):
     """Table body."""
 
     @property
+    @cache
     def row_cls(self):
         """Row table class."""
         return self.container.row_cls
 
     @property
+    @cache
     def row_xpath(self):
         """Row xpath."""
         return self.container.row_xpath
 
     @property
+    @cache
     def columns(self):
         """Table columns."""
         return self.container.columns
-
-    @property
-    @timeit
-    def rows(self):
-        """Visible rows of table."""
-        locator = By.XPATH, self.row_xpath
-        _rows = []
-
-        for index, element in enumerate(self.find_elements(locator)):
-            if element.is_displayed():
-
-                row = self.row_cls(locator[0], locator[1], index=index)
-                row.container = self
-                _rows.append(row)
-
-        return _rows
 
     def row(self, **kwgs):
         """Get row of table."""
@@ -151,27 +157,11 @@ class Table(Block):
         return self.body.row(**kwgs)
 
 
-class List(Block):
+class List(Block, _RowsMixin):
     """List."""
 
     row_cls = Row
     row_xpath = ".//li"
-
-    @property
-    @timeit
-    def rows(self):
-        """Visible rows of table."""
-        locator = By.XPATH, self.row_xpath
-        _rows = []
-
-        for index, element in enumerate(self.find_elements(locator)):
-            if element.is_displayed():
-
-                row = self.row_cls(locator[0], locator[1], index=index)
-                row.container = self
-                _rows.append(row)
-
-        return _rows
 
     def row(self, content):
         """Get row of table."""
