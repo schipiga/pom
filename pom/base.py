@@ -18,6 +18,7 @@ POM base classes.
 # limitations under the License.
 
 import logging
+import re
 
 from selenium import webdriver
 
@@ -49,6 +50,10 @@ def register_pages(pages):
     """Decorator to register pages in application."""
     def wrapper(cls):
         """Wrapper to register pages."""
+        cls._registered_pages.extend(pages)
+        cls._registered_pages.sort(
+            key=lambda page: len(page.url), reverse=True)
+
         for page in pages:
             func_name = camel2snake(page.__name__)
 
@@ -66,6 +71,8 @@ def register_pages(pages):
 
 class App(object):
     """Web application."""
+
+    _registered_pages = []
 
     def __init__(self, url, browser, *args, **kwgs):
         """Constructor."""
@@ -85,6 +92,16 @@ class App(object):
         """Close browser."""
         LOGGER.info('Close browser')
         self.webdriver.quit()
+
+    @property
+    def current_page(self):
+        """Define current page"""
+        current_url = self.webdriver.current_url
+        for page in self._registered_pages:
+            if re.match(self.app_url + page.url, current_url):
+                return getattr(self, camel2snake(page.__name__))
+        else:
+            raise Exception("Can't define current page")
 
 
 class Page(Container):
