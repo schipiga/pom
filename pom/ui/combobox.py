@@ -31,7 +31,8 @@ class ComboBox(UI):
     @wait_for_presence
     def value(self):
         """Combobox value."""
-        return self._select.first_selected_option.text
+        return self._select.first_selected_option \
+            .get_attribute('innerHTML').strip()
 
     @value.setter
     @timeit
@@ -55,7 +56,8 @@ class ComboBox(UI):
     @wait_for_presence
     def values(self):
         """Combobox values."""
-        return [o.text for o in self._select.options]
+        return [o.get_attribute('innerHTML').strip()
+                for o in self._select.options]
 
     @property
     def _select(self):
