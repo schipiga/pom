@@ -80,6 +80,12 @@ Its implementation with POM:
          assert self.fb.current_page == self.fb.page_login
          assert self.fb.page_login.alert_message.is_present
 
+**To launch example:**
+
+- Save example code in file ``test_pom.py``
+- Install POM framework ``pip install python-pom``
+- Launch test example ``python -m unittest test_pom``
+
 Full example of usage is in https://github.com/sergeychipiga/horizon_autotests.
 
 =======================
