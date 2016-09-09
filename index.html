@@ -1,0 +1,634 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to POM’s documentation! &mdash; POM 1.0.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/tweaks.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="POM 1.0.2 documentation" href="#" /> 
+  </head>
+  <body role="document">
+  <div id="header">
+    <h1 id="logo"><a href="http://www.openstack.org/">OpenStack</a></h1>
+    <ul id="navigation">
+      
+      <li><a href="http://www.openstack.org/" title="Go to the Home page" class="link">Home</a></li>
+      <li><a href="http://www.openstack.org/projects/" title="Go to the OpenStack Projects page">Projects</a></li>
+      <li><a href="http://www.openstack.org/user-stories/" title="Go to the User Stories page" class="link">User Stories</a></li>
+      <li><a href="http://www.openstack.org/community/" title="Go to the Community page" class="link">Community</a></li>
+      <li><a href="http://www.openstack.org/blog/" title="Go to the OpenStack Blog">Blog</a></li>
+      <li><a href="http://wiki.openstack.org/" title="Go to the OpenStack Wiki">Wiki</a></li>
+      <li><a href="http://docs.openstack.org/" title="Go to OpenStack Documentation" class="current">Documentation</a></li>
+      
+    </ul>
+  </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-pom-s-documentation">
+<h1>Welcome to POM&#8217;s documentation!<a class="headerlink" href="#welcome-to-pom-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="annotation">
+<h2>Annotation<a class="headerlink" href="#annotation" title="Permalink to this headline">¶</a></h2>
+<p>POM is Page-Object-Model microframework to develop web UI tests easy, quickly and with pleasure.</p>
+</div>
+<div class="section" id="architecture">
+<h2>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h2>
+<p>POM provides API to manipulate with web UI elements and pages in browser. Under hood it uses selenium.
+Before to act with UI element POM waits for its visibility, because in user cases user can&#8217;t interact with UI element if it isn&#8217;t visible at display.
+POM provides tree hirarchy to request UI elements with UI caching mechanism at each level.</p>
+<p>POM doesn&#8217;t use <strong>implicit_wait</strong> method to wait UI element, because implicit_wait waits until element is present at DOM even if it isn&#8217;t visible. And also implicit_wait has conflict with caching mechanism, that leads to long requests in some cases.</p>
+<p>So POM has own implementation to wait element before interact. It leads to additinal webdriver request before interact with UI element, but provide reliable and simple architecture, without speed degradation.</p>
+</div>
+<div class="section" id="how-to-start">
+<h2>How to start<a class="headerlink" href="#how-to-start" title="Permalink to this headline">¶</a></h2>
+<p>Let imagine simple testcase:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">Go</span> <span class="pre">to</span> <span class="pre">https://facebook.com</span></code></li>
+<li><code class="docutils literal"><span class="pre">Fill</span> <span class="pre">login</span> <span class="pre">/</span> <span class="pre">password</span> <span class="pre">fields</span> <span class="pre">with</span> <span class="pre">'admin'</span> <span class="pre">/</span> <span class="pre">'admin'</span> <span class="pre">values</span></code></li>
+<li><code class="docutils literal"><span class="pre">Click</span> <span class="pre">button</span> <span class="pre">login</span></code></li>
+<li><code class="docutils literal"><span class="pre">Assert</span> <span class="pre">page</span> <span class="pre">to</span> <span class="pre">log</span> <span class="pre">in</span> <span class="pre">is</span> <span class="pre">opened</span></code></li>
+<li><code class="docutils literal"><span class="pre">Assert</span> <span class="pre">alert</span> <span class="pre">message</span> <span class="pre">is</span> <span class="pre">opened</span></code></li>
+</ul>
+<p>Its implementation with POM:</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unittest</span>
+
+<span class="kn">import</span> <span class="nn">pom</span>
+<span class="kn">from</span> <span class="nn">pom</span> <span class="k">import</span> <span class="n">ui</span>
+<span class="kn">from</span> <span class="nn">selenium.webdriver.common.by</span> <span class="k">import</span> <span class="n">By</span>
+
+
+<span class="nd">@ui</span><span class="o">.</span><span class="n">register_ui</span><span class="p">(</span><span class="n">field_login</span><span class="o">=</span><span class="n">ui</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="n">By</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="s1">&#39;email&#39;</span><span class="p">),</span>
+                <span class="n">field_password</span><span class="o">=</span><span class="n">ui</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="n">By</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="s1">&#39;pass&#39;</span><span class="p">))</span>
+<span class="k">class</span> <span class="nc">FormLogin</span><span class="p">(</span><span class="n">ui</span><span class="o">.</span><span class="n">Form</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Form to login.&quot;&quot;&quot;</span>
+
+
+<span class="nd">@ui</span><span class="o">.</span><span class="n">register_ui</span><span class="p">(</span><span class="n">form_login</span><span class="o">=</span><span class="n">FormLogin</span><span class="p">(</span><span class="n">By</span><span class="o">.</span><span class="n">ID</span><span class="p">,</span> <span class="s1">&#39;login_form&#39;</span><span class="p">))</span>
+<span class="k">class</span> <span class="nc">PageMain</span><span class="p">(</span><span class="n">pom</span><span class="o">.</span><span class="n">Page</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Main page.&quot;&quot;&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span>
+
+
+<span class="nd">@ui</span><span class="o">.</span><span class="n">register_ui</span><span class="p">(</span>
+    <span class="n">alert_message</span><span class="o">=</span><span class="n">ui</span><span class="o">.</span><span class="n">Block</span><span class="p">(</span><span class="n">By</span><span class="o">.</span><span class="n">CSS_SELECTOR</span><span class="p">,</span> <span class="s1">&#39;div.uiContextualLayerPositioner&#39;</span><span class="p">))</span>
+<span class="k">class</span> <span class="nc">PageLogin</span><span class="p">(</span><span class="n">pom</span><span class="o">.</span><span class="n">Page</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Login page.&quot;&quot;&quot;</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/login&#39;</span>
+
+
+<span class="nd">@pom</span><span class="o">.</span><span class="n">register_pages</span><span class="p">([</span><span class="n">PageMain</span><span class="p">,</span> <span class="n">PageLogin</span><span class="p">])</span>
+<span class="k">class</span> <span class="nc">Facebook</span><span class="p">(</span><span class="n">pom</span><span class="o">.</span><span class="n">App</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Facebook web application.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Facebook</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s1">&#39;https://www.facebook.com&#39;</span><span class="p">,</span> <span class="s1">&#39;firefox&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">webdriver</span><span class="o">.</span><span class="n">maximize_window</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">webdriver</span><span class="o">.</span><span class="n">set_page_load_timeout</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">TestCase</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fb</span> <span class="o">=</span> <span class="n">Facebook</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addCleanup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fb</span><span class="o">.</span><span class="n">quit</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_facebook_invalid_login</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;User with invalid credentials can&#39;t login to facebook.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fb</span><span class="o">.</span><span class="n">page_main</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">fb</span><span class="o">.</span><span class="n">page_main</span><span class="o">.</span><span class="n">form_login</span> <span class="k">as</span> <span class="n">form</span><span class="p">:</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">field_login</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;admin&#39;</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">field_password</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;admin&#39;</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">submit</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">fb</span><span class="o">.</span><span class="n">current_page</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">fb</span><span class="o">.</span><span class="n">page_login</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">fb</span><span class="o">.</span><span class="n">page_login</span><span class="o">.</span><span class="n">alert_message</span><span class="o">.</span><span class="n">is_present</span>
+</pre></div>
+</div>
+<p><strong>To launch example:</strong></p>
+<ul class="simple">
+<li>Save example code in file <code class="docutils literal"><span class="pre">test_pom.py</span></code></li>
+<li>Install POM framework <code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">python-pom</span></code></li>
+<li>Launch test example <code class="docutils literal"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">unittest</span> <span class="pre">test_pom</span></code></li>
+</ul>
+<p>Full example of usage is in <a class="reference external" href="https://github.com/sergeychipiga/horizon_autotests">https://github.com/sergeychipiga/horizon_autotests</a>.</p>
+</div>
+<div class="section" id="supported-components">
+<h2>Supported components<a class="headerlink" href="#supported-components" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="app-base-application-class">
+<h3>App (base application class)<a class="headerlink" href="#app-base-application-class" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pom.base.App">
+<em class="property">class </em><code class="descclassname">pom.base.</code><code class="descname">App</code><span class="sig-paren">(</span><em>url</em>, <em>browser</em>, <em>*args</em>, <em>**kwgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/base.html#App"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.base.App" title="Permalink to this definition">¶</a></dt>
+<dd><p>Web application.</p>
+<dl class="attribute">
+<dt id="pom.base.App.current_page">
+<code class="descname">current_page</code><a class="headerlink" href="#pom.base.App.current_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define current page</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pom.base.App.open">
+<code class="descname">open</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/base.html#App.open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.base.App.open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open url.</p>
+<dl class="docutils">
+<dt>Arguments:</dt>
+<dd><ul class="first last simple">
+<li>url: string.</li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pom.base.App.quit">
+<code class="descname">quit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/base.html#App.quit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.base.App.quit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close browser.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="page-base-page-class">
+<h3>Page (base page class)<a class="headerlink" href="#page-base-page-class" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pom.base.Page">
+<em class="property">class </em><code class="descclassname">pom.base.</code><code class="descname">Page</code><span class="sig-paren">(</span><em>app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/base.html#Page"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.base.Page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Page of web application.</p>
+<dl class="method">
+<dt id="pom.base.Page.back">
+<code class="descname">back</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/base.html#Page.back"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.base.Page.back" title="Permalink to this definition">¶</a></dt>
+<dd><p>Back.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pom.base.Page.forward">
+<code class="descname">forward</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/base.html#Page.forward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.base.Page.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forward.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pom.base.Page.open">
+<code class="descname">open</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/base.html#Page.open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.base.Page.open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open page.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pom.base.Page.refresh">
+<code class="descname">refresh</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/base.html#Page.refresh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.base.Page.refresh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Refresh page.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="ui-base-element-class">
+<h3>UI (base element class)<a class="headerlink" href="#ui-base-element-class" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pom.ui.base.UI">
+<em class="property">class </em><code class="descclassname">pom.ui.base.</code><code class="descname">UI</code><span class="sig-paren">(</span><em>*locator</em>, <em>**index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/base.html#UI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.base.UI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class of ui element.</p>
+<dl class="method">
+<dt id="pom.ui.base.UI.click">
+<code class="descname">click</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/base.html#UI.click"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.base.UI.click" title="Permalink to this definition">¶</a></dt>
+<dd><p>Click ui element.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pom.ui.base.UI.clone">
+<code class="descname">clone</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/base.html#UI.clone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.base.UI.clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clone ui element.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pom.ui.base.UI.double_click">
+<code class="descname">double_click</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/base.html#UI.double_click"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.base.UI.double_click" title="Permalink to this definition">¶</a></dt>
+<dd><p>Double click ui element.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pom.ui.base.UI.get_attribute">
+<code class="descname">get_attribute</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/base.html#UI.get_attribute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.base.UI.get_attribute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get attribute of ui element.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pom.ui.base.UI.is_enabled">
+<code class="descname">is_enabled</code><a class="headerlink" href="#pom.ui.base.UI.is_enabled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define is ui element enabled.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pom.ui.base.UI.is_present">
+<code class="descname">is_present</code><a class="headerlink" href="#pom.ui.base.UI.is_present" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define is ui element present at display.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pom.ui.base.UI.right_click">
+<code class="descname">right_click</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/base.html#UI.right_click"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.base.UI.right_click" title="Permalink to this definition">¶</a></dt>
+<dd><p>Right click ui element.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pom.ui.base.UI.value">
+<code class="descname">value</code><a class="headerlink" href="#pom.ui.base.UI.value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get value of ui element.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pom.ui.base.UI.wait_for_absence">
+<code class="descname">wait_for_absence</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/base.html#UI.wait_for_absence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.base.UI.wait_for_absence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait for ui element absence.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pom.ui.base.UI.wait_for_presence">
+<code class="descname">wait_for_presence</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/base.html#UI.wait_for_presence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.base.UI.wait_for_presence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait for ui element presence.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pom.ui.base.UI.webdriver">
+<code class="descname">webdriver</code><a class="headerlink" href="#pom.ui.base.UI.webdriver" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get webdriver.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pom.ui.base.UI.webelement">
+<code class="descname">webelement</code><a class="headerlink" href="#pom.ui.base.UI.webelement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get webelement.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="button">
+<h3>Button<a class="headerlink" href="#button" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pom.ui.button.Button">
+<em class="property">class </em><code class="descclassname">pom.ui.button.</code><code class="descname">Button</code><span class="sig-paren">(</span><em>*locator</em>, <em>**index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/button.html#Button"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.button.Button" title="Permalink to this definition">¶</a></dt>
+<dd><p>Button.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="checkbox">
+<h3>CheckBox<a class="headerlink" href="#checkbox" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pom.ui.checkbox.CheckBox">
+<em class="property">class </em><code class="descclassname">pom.ui.checkbox.</code><code class="descname">CheckBox</code><span class="sig-paren">(</span><em>*locator</em>, <em>**index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/checkbox.html#CheckBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.checkbox.CheckBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checkbox.</p>
+<dl class="attribute">
+<dt id="pom.ui.checkbox.CheckBox.is_selected">
+<code class="descname">is_selected</code><a class="headerlink" href="#pom.ui.checkbox.CheckBox.is_selected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define is checkbox selected.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pom.ui.checkbox.CheckBox.select">
+<code class="descname">select</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/checkbox.html#CheckBox.select"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.checkbox.CheckBox.select" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select checkbox if it isn&#8217;t selected.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pom.ui.checkbox.CheckBox.unselect">
+<code class="descname">unselect</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/checkbox.html#CheckBox.unselect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.checkbox.CheckBox.unselect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unselect checkbox if it is selected.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="combobox">
+<h3>ComboBox<a class="headerlink" href="#combobox" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pom.ui.combobox.ComboBox">
+<em class="property">class </em><code class="descclassname">pom.ui.combobox.</code><code class="descname">ComboBox</code><span class="sig-paren">(</span><em>*locator</em>, <em>**index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/combobox.html#ComboBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.combobox.ComboBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combobox.</p>
+<dl class="attribute">
+<dt id="pom.ui.combobox.ComboBox.value">
+<code class="descname">value</code><a class="headerlink" href="#pom.ui.combobox.ComboBox.value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combobox value.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pom.ui.combobox.ComboBox.values">
+<code class="descname">values</code><a class="headerlink" href="#pom.ui.combobox.ComboBox.values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combobox values.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="textfield">
+<h3>TextField<a class="headerlink" href="#textfield" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pom.ui.fields.TextField">
+<em class="property">class </em><code class="descclassname">pom.ui.fields.</code><code class="descname">TextField</code><span class="sig-paren">(</span><em>*locator</em>, <em>**index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/fields.html#TextField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.fields.TextField" title="Permalink to this definition">¶</a></dt>
+<dd><p>Text field.</p>
+<dl class="attribute">
+<dt id="pom.ui.fields.TextField.value">
+<code class="descname">value</code><a class="headerlink" href="#pom.ui.fields.TextField.value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value of text field.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="integerfield">
+<h3>IntegerField<a class="headerlink" href="#integerfield" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pom.ui.fields.IntegerField">
+<em class="property">class </em><code class="descclassname">pom.ui.fields.</code><code class="descname">IntegerField</code><span class="sig-paren">(</span><em>*locator</em>, <em>**index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/fields.html#IntegerField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.fields.IntegerField" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer field.</p>
+<dl class="attribute">
+<dt id="pom.ui.fields.IntegerField.value">
+<code class="descname">value</code><a class="headerlink" href="#pom.ui.fields.IntegerField.value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value of integer field.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="filefield">
+<h3>FileField<a class="headerlink" href="#filefield" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pom.ui.fields.FileField">
+<em class="property">class </em><code class="descclassname">pom.ui.fields.</code><code class="descname">FileField</code><span class="sig-paren">(</span><em>*locator</em>, <em>**index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/fields.html#FileField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.fields.FileField" title="Permalink to this definition">¶</a></dt>
+<dd><p>File field.</p>
+<dl class="attribute">
+<dt id="pom.ui.fields.FileField.value">
+<code class="descname">value</code><a class="headerlink" href="#pom.ui.fields.FileField.value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value of text field.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="form">
+<h3>Form<a class="headerlink" href="#form" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pom.ui.form.Form">
+<em class="property">class </em><code class="descclassname">pom.ui.form.</code><code class="descname">Form</code><span class="sig-paren">(</span><em>*locator</em>, <em>**index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/form.html#Form"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.form.Form" title="Permalink to this definition">¶</a></dt>
+<dd><p>Form.</p>
+<dl class="method">
+<dt id="pom.ui.form.Form.submit">
+<code class="descname">submit</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/form.html#Form.submit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.form.Form.submit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Submit form.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="link">
+<h3>Link<a class="headerlink" href="#link" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pom.ui.link.Link">
+<em class="property">class </em><code class="descclassname">pom.ui.link.</code><code class="descname">Link</code><span class="sig-paren">(</span><em>*locator</em>, <em>**index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/link.html#Link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.link.Link" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link.</p>
+<dl class="attribute">
+<dt id="pom.ui.link.Link.href">
+<code class="descname">href</code><a class="headerlink" href="#pom.ui.link.Link.href" title="Permalink to this definition">¶</a></dt>
+<dd><p>URL of link.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="list">
+<h3>List<a class="headerlink" href="#list" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pom.ui.table.List">
+<em class="property">class </em><code class="descclassname">pom.ui.table.</code><code class="descname">List</code><span class="sig-paren">(</span><em>*locator</em>, <em>**index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/table.html#List"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.table.List" title="Permalink to this definition">¶</a></dt>
+<dd><p>List.</p>
+<dl class="method">
+<dt id="pom.ui.table.List.row">
+<code class="descname">row</code><span class="sig-paren">(</span><em>content</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/table.html#List.row"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.table.List.row" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get row of table.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pom.ui.table.List.row_cls">
+<code class="descname">row_cls</code><a class="headerlink" href="#pom.ui.table.List.row_cls" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Row</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="table">
+<h3>Table<a class="headerlink" href="#table" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pom.ui.table.Table">
+<em class="property">class </em><code class="descclassname">pom.ui.table.</code><code class="descname">Table</code><span class="sig-paren">(</span><em>*locator</em>, <em>**index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/table.html#Table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.table.Table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table.</p>
+<dl class="method">
+<dt id="pom.ui.table.Table.row">
+<code class="descname">row</code><span class="sig-paren">(</span><em>**kwgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/table.html#Table.row"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.table.Table.row" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get row of table.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pom.ui.table.Table.row_cls">
+<code class="descname">row_cls</code><a class="headerlink" href="#pom.ui.table.Table.row_cls" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Row</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pom.ui.table.Table.rows">
+<code class="descname">rows</code><a class="headerlink" href="#pom.ui.table.Table.rows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table rows.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="row">
+<h3>Row<a class="headerlink" href="#row" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pom.ui.table.Row">
+<em class="property">class </em><code class="descclassname">pom.ui.table.</code><code class="descname">Row</code><span class="sig-paren">(</span><em>*locator</em>, <em>**index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/table.html#Row"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.table.Row" title="Permalink to this definition">¶</a></dt>
+<dd><p>Row of table.</p>
+<dl class="attribute">
+<dt id="pom.ui.table.Row.cell_cls">
+<code class="descname">cell_cls</code><a class="headerlink" href="#pom.ui.table.Row.cell_cls" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Block</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="header">
+<h3>Header<a class="headerlink" href="#header" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pom.ui.table.Header">
+<em class="property">class </em><code class="descclassname">pom.ui.table.</code><code class="descname">Header</code><span class="sig-paren">(</span><em>*locator</em>, <em>**index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/table.html#Header"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.table.Header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Header of table.</p>
+<dl class="attribute">
+<dt id="pom.ui.table.Header.cell_cls">
+<code class="descname">cell_cls</code><a class="headerlink" href="#pom.ui.table.Header.cell_cls" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Block</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="body">
+<h3>Body<a class="headerlink" href="#body" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pom.ui.table.Body">
+<em class="property">class </em><code class="descclassname">pom.ui.table.</code><code class="descname">Body</code><span class="sig-paren">(</span><em>*locator</em>, <em>**index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/table.html#Body"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.table.Body" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table body.</p>
+<dl class="attribute">
+<dt id="pom.ui.table.Body.columns">
+<code class="descname">columns</code><a class="headerlink" href="#pom.ui.table.Body.columns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table columns.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pom.ui.table.Body.row">
+<code class="descname">row</code><span class="sig-paren">(</span><em>**kwgs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/table.html#Body.row"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.table.Body.row" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get row of table.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pom.ui.table.Body.row_cls">
+<code class="descname">row_cls</code><a class="headerlink" href="#pom.ui.table.Body.row_cls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Row table class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pom.ui.table.Body.row_xpath">
+<code class="descname">row_xpath</code><a class="headerlink" href="#pom.ui.table.Body.row_xpath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Row xpath.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="footer">
+<h3>Footer<a class="headerlink" href="#footer" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="pom.ui.table.Footer">
+<em class="property">class </em><code class="descclassname">pom.ui.table.</code><code class="descname">Footer</code><span class="sig-paren">(</span><em>*locator</em>, <em>**index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pom/ui/table.html#Footer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pom.ui.table.Footer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table footer.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+<div class="sphinxsidebar">
+    <div class="sphinxsidebarwrapper">
+            <h3><a href="#">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference internal" href="#">Welcome to POM&#8217;s documentation!</a><ul>
+<li><a class="reference internal" href="#annotation">Annotation</a></li>
+<li><a class="reference internal" href="#architecture">Architecture</a></li>
+<li><a class="reference internal" href="#how-to-start">How to start</a></li>
+<li><a class="reference internal" href="#supported-components">Supported components</a><ul>
+<li><a class="reference internal" href="#app-base-application-class">App (base application class)</a></li>
+<li><a class="reference internal" href="#page-base-page-class">Page (base page class)</a></li>
+<li><a class="reference internal" href="#ui-base-element-class">UI (base element class)</a></li>
+<li><a class="reference internal" href="#button">Button</a></li>
+<li><a class="reference internal" href="#checkbox">CheckBox</a></li>
+<li><a class="reference internal" href="#combobox">ComboBox</a></li>
+<li><a class="reference internal" href="#textfield">TextField</a></li>
+<li><a class="reference internal" href="#integerfield">IntegerField</a></li>
+<li><a class="reference internal" href="#filefield">FileField</a></li>
+<li><a class="reference internal" href="#form">Form</a></li>
+<li><a class="reference internal" href="#link">Link</a></li>
+<li><a class="reference internal" href="#list">List</a></li>
+<li><a class="reference internal" href="#table">Table</a></li>
+<li><a class="reference internal" href="#row">Row</a></li>
+<li><a class="reference internal" href="#header">Header</a></li>
+<li><a class="reference internal" href="#body">Body</a></li>
+<li><a class="reference internal" href="#footer">Footer</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            <h3>Project Source</h3>
+            <ul class="this-page-menu">
+              <li><a href="http://git.openstack.org/cgit/sergeychipiga/pom
+"
+                     rel="nofollow">Project Source</a></li>
+            </ul>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="_sources/index.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+    </div>
+</div>
+
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="nav-item nav-item-0"><a href="#">POM 1.0.2 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Sergei Chipiga.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.5.
+    </div>
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+//Tracking docs.openstack.org/developer/<projectname> only
+//The URL is built from the project variable in conf.py
+var pageTracker = _gat._getTracker("UA-17511903-1");
+pageTracker._setCookiePath("/developer/POM");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+  </body>
+</html>
