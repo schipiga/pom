@@ -31,16 +31,21 @@ class TextField(UI):
         """Value of text field."""
         return self.webelement.text or self.webelement.get_attribute('value')
 
-    @value.setter
     @timeit
     @wait_for_presence
-    def value(self, text):
+    def set_value(self, text):
         """Set value of text field."""
         self.webelement.clear()
         self.webelement.send_keys(text)
 
+    @timeit
+    @wait_for_presence
+    def add_value(self, text):
+        """Add value to current."""
+        self.webelement.send_keys(text)
 
-class IntegerField(UI):
+
+class IntegerField(TextField):
     """Integer field."""
 
     @property
@@ -50,16 +55,8 @@ class IntegerField(UI):
         """Value of integer field."""
         return self.webelement.get_attribute('value')
 
-    @value.setter
-    @timeit
-    @wait_for_presence
-    def value(self, text):
-        """Set value of integer field."""
-        self.webelement.clear()
-        self.webelement.send_keys(text)
 
-
-class FileField(UI):
+class FileField(TextField):
     """File field."""
 
     @property
@@ -68,11 +65,3 @@ class FileField(UI):
     def value(self):
         """Value of text field."""
         return self.webelement.text
-
-    @value.setter
-    @timeit
-    @wait_for_presence
-    def value(self, text):
-        """Set value of text field."""
-        self.webelement.clear()
-        self.webelement.send_keys(text)

@@ -22,28 +22,27 @@ import re
 
 from selenium import webdriver
 
-from .ui import Container
-from .utils import cache, timeit
+from pom import ui
+from pom import utils
+from pom.exceptions import PomError
 
 __all__ = [
     'App',
     'Page',
-    'register_pages'
+    'register_pages',
 ]
 
 LOGGER = logging.getLogger(__name__)
 
 browsers = {
+    'chrome': webdriver.Chrome,
+    'edge': webdriver.Edge,
     'firefox': webdriver.Firefox,
+    'ie': webdriver.Ie,
+    'opera': webdriver.Opera,
+    'safari': webdriver.Safari,
     'phantom': webdriver.PhantomJS,
-    'Chrome': webdriver.Chrome,
 }
-
-
-def camel2snake(string):
-    """Camel case to snake case converter."""
-    return ''.join('_{}'.format(s.lower()) if s.isupper() else s
-                   for s in string).strip('_')
 
 
 def register_pages(pages):
@@ -55,13 +54,13 @@ def register_pages(pages):
             key=lambda page: len(page.url), reverse=True)
 
         for page in pages:
-            func_name = camel2snake(page.__name__)
+            func_name = utils.camel2snake(page.__name__)
 
             def page_getter(self, page=page):
                 return page(self)
 
             page_getter.__name__ = func_name
-            page_getter = property(cache(page_getter))
+            page_getter = property(utils.cache(page_getter))
             setattr(cls, func_name, page_getter)
 
         return cls
@@ -99,12 +98,12 @@ class App(object):
         current_url = self.webdriver.current_url
         for page in self._registered_pages:
             if re.match(self.app_url + page.url, current_url):
-                return getattr(self, camel2snake(page.__name__))
+                return getattr(self, utils.camel2snake(page.__name__))
         else:
-            raise Exception("Can't define current page")
+            raise PomError("Can't define current page")
 
 
-class Page(Container):
+class Page(ui.Container):
     """Page of web application."""
 
     url = None
@@ -112,25 +111,38 @@ class Page(Container):
     def __init__(self, app):
         """Constructor."""
         self.app = app
-        self.webdriver = app.webdriver
-        self.webelement = self.webdriver
+        self.webdriver = self.webelement = app.webdriver
 
-    @timeit
+    @utils.timeit
     def refresh(self):
         """Refresh page."""
         self.webdriver.refresh()
 
-    @timeit
+    @utils.timeit
     def open(self):
         """Open page."""
         self.app.open(self.url)
 
-    @timeit
+    @utils.timeit
     def forward(self):
         """Forward."""
         self.webdriver.forward()
 
-    @timeit
+    @utils.timeit
     def back(self):
         """Back."""
         self.webdriver.back()
+
+    @property
+    @utils.timeit
+    def source(self):
+        """Page source code."""
+        return self.webdriver.page_source
+
+    @utils.timeit
+    def exec_js(self, js_code, async=False):
+        """Execute javascript code."""
+        if async:
+            self.webdriver.execute_async_script(js_code)
+        else:
+            self.webdriver.execute_script(js_code)

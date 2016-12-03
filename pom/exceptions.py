@@ -1,7 +1,7 @@
 """
-Page Object Model.
-
-@author: chipiga86@gmail.com
+--------------
+POM exceptions
+--------------
 """
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,10 +17,6 @@ Page Object Model.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .base import App, Page, register_pages
 
-__all__ = [
-    'App',
-    'Page',
-    'register_pages',
-]
+class PomError(Exception):
+    """POM Error class."""

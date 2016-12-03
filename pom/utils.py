@@ -1,7 +1,7 @@
 """
-POM utils.
-
-@author: chipiga86@gmail.com
+---------
+POM utils
+---------
 """
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,21 +18,45 @@ POM utils.
 # limitations under the License.
 
 import functools
+import inspect
 import logging
 import time
 
 __all__ = [
     'cache',
-    'sleep',
-    'timeit'
+    'camel2snake',
+    'log',
 ]
 
-TIMEIT_LOG = logging.getLogger('timeit')
 LOGGER = logging.getLogger(__name__)
 
 
 def cache(func):
-    """Decorator to cache instance method execution result."""
+    """Decorator to cache instance method execution result.
+
+    Note:
+        It implements ordinary approach to cache function execution result.
+        But also it uses as key not only function name but its id too.
+        It's related with inheritance specific, like that:
+
+        .. code:: python
+
+            class A(object):
+
+                @cache
+                def meth(self):
+                    pass
+
+            class B(A):
+
+                @cache
+                def meth(self):
+                    pass
+
+                @cache
+                def _meth(self):
+                    super(A, self).meth()
+    """
     attrname = '_cached_{}_{}'.format(func.__name__, id(func))
 
     @functools.wraps(func)
@@ -46,33 +70,72 @@ def cache(func):
     return wrapper
 
 
-def timeit(type_name):
-    """Decorator to log function execution time."""
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwgs):
-            start = time.time()
-            try:
-                return func(*args, **kwgs)
-            finally:
-                TIMEIT_LOG.debug(
-                    "{} {!r} with args {!r} and kwargs {!r} took {:.4f}"
-                    " second(s)".format(type_name or 'Function',
-                                        func.__name__,
-                                        args,
-                                        kwgs,
-                                        time.time() - start))
-        return wrapper
-
-    if callable(type_name):
-        func = type_name
-        type_name = None
-        return decorator(func)
-    else:
-        return decorator
+def camel2snake(string):
+    """Camel case to snake case converter."""
+    return ''.join('_{}'.format(s.lower()) if s.isupper() else s
+                   for s in string).strip('_')
 
 
-def sleep(seconds, message):
-    """Sleep with message."""
-    LOGGER.warn('Sleep {} second(s): {!r}'.format(seconds, message))
-    time.sleep(seconds)
+def log(func):
+    """Decorator to log function with arguments and execution time.
+
+    Note:
+        It rejects ``self`` arguments from log messages.
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwgs):
+        # reject self from log args if it is present
+        __tracebackhide__ = True
+        log_args = _reject_self_from_args(func, args)
+
+        func_name = getattr(func, '__name__', str(func))
+        LOGGER.debug(
+            'Function {!r} starts with args {!r} and kwgs {!r}'.format(
+                func_name, log_args, kwgs))
+        start = time.time()
+        try:
+            result = func(*args, **kwgs)
+        finally:
+            LOGGER.debug('Function {!r} ended in {:.4f} sec'.format(
+                func_name, time.time() - start))
+        return result
+
+    return wrapper
+
+
+def get_unwrapped_func(func):
+    """Get original function under decorator.
+
+    Decorator hides original function inside itself. But in some cases it's
+    important to get access to original function, for ex: for documentation.
+
+    Args:
+        func (function): function that can be potentially a decorator which
+            hides original function
+
+    Returns:
+        function: unwrapped function or the same function
+    """
+    if not inspect.isfunction(func) and not inspect.ismethod(func):
+        return func
+
+    if func.__name__ != func.func_code.co_name:
+        for cell in func.func_closure:
+            obj = cell.cell_contents
+            if inspect.isfunction(obj):
+                if func.__name__ == obj.func_code.co_name:
+                    return obj
+                else:
+                    return get_unwrapped_func(obj)
+    return func
+
+
+def _reject_self_from_args(func, args):
+    func_name = getattr(func, '__name__', str(func))
+    args = list(args)
+    if args:
+        arg = args[0]
+        im_func = getattr(getattr(arg, func_name, None), 'im_func', None)
+        if get_unwrapped_func(im_func) is get_unwrapped_func(func):
+            args.remove(arg)
+    return args

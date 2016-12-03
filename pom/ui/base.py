@@ -22,11 +22,22 @@ import logging
 
 from selenium.common import exceptions
 from selenium.webdriver import ActionChains
-from waiting import TimeoutExpired, wait
+import waiting
 
-from ..utils import cache, timeit
+from pom import utils
+from pom.exceptions import PomError
+
+__all__ = [
+    'Block',
+    'Container',
+    'register_ui',
+    'wait_for_presence',
+    'WebElementProxy',
+    'UI',
+]
 
 LOGGER = logging.getLogger(__name__)
+
 PRESENCE_ERRORS = (exceptions.StaleElementReferenceException,
                    exceptions.NoSuchElementException)
 
@@ -60,19 +71,19 @@ class Container(object):
         Sets ui elements as cached properties. Inside property it clones ui
         element to provide safe-thread execution.
         """
-        for ui_name, ui_obj in ui.iteritems():
+        for ui_name, ui_obj in ui.items():
 
             def ui_getter(self, ui_obj=ui_obj):
                 ui_clone = ui_obj.clone()
-                ui_clone.container = self
+                ui_clone.set_container(self)
                 return ui_clone
 
             ui_getter.__name__ = ui_name
-            ui_getter = property(cache(ui_getter))
+            ui_getter = property(utils.cache(ui_getter))
             setattr(cls, ui_name, ui_getter)
 
     def __enter__(self):
-        """Allow use container as context manager for readable code."""
+        """Use container as context manager for readable code."""
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -97,6 +108,11 @@ class WebElementProxy(object):
         self._cached_webelement = None
         self._ui_info = ui_info
 
+    @utils.cache
+    def __dir__(self):
+        """Return available methods for code completion."""
+        return dir(self._webelement_getter())
+
     def __getattr__(self, name):
         """Execute web element methods and properties."""
         def webelement_attr(self=self):
@@ -106,33 +122,36 @@ class WebElementProxy(object):
 
         try:
             result = webelement_attr()
+
         except PRESENCE_ERRORS:
-            LOGGER.warn("{} isn't present in DOM. Cache is flushed.".format(
+            LOGGER.debug("{} isn't present in DOM. Cache is flushed.".format(
                 self._ui_info))
             self._cached_webelement = None
             result = webelement_attr()
 
-        if not callable(result):
+        if not callable(result):  # It's selenium element property.
             return result
 
         def method(*args, **kwgs):
             try:
                 return result(*args, **kwgs)
+
             except PRESENCE_ERRORS:
-                LOGGER.warn(
+                LOGGER.debug(
                     "{} isn't present in DOM. Cache is flushed.".format(
                         self._ui_info))
                 self._cached_webelement = None
                 return webelement_attr()(*args, **kwgs)
 
+        method.__name__ = name
         return method
 
 
 class UI(object):
     """Base class of ui element."""
 
-    container = None
-    timeout = 10
+    _container = None
+    _timeout = 5  # sec to wait element presence / absence in DOM
 
     def __init__(self, *locator, **index):
         """Constructor.
@@ -143,7 +162,7 @@ class UI(object):
         self.locator = locator
         self.index = index.get('index')
 
-    @cache
+    @utils.cache
     def __repr__(self):
         """Object representation."""
         return self.__class__.__name__ + \
@@ -151,39 +170,48 @@ class UI(object):
             ', value={!r}'.format(self.locator[1]) + \
             (')' if self.index is None else ', index={})'.format(self.index))
 
-    @timeit
+    @property
+    def container(self):
+        """Get container of webelement."""
+        return self._container
+
+    def set_container(self, container):
+        """Set container of webelement."""
+        self._container = container
+
+    @utils.timeit
     @wait_for_presence
     def click(self):
         """Click ui element."""
         self.webelement.click()
 
-    @timeit
+    @utils.timeit
     @wait_for_presence
     def right_click(self):
         """Right click ui element."""
         self._action_chains.context_click(self.webelement).perform()
 
-    @timeit
+    @utils.timeit
     @wait_for_presence
     def double_click(self):
         """Double click ui element."""
         self._action_chains.double_click(self.webelement).perform()
 
-    @timeit
+    @utils.timeit
     @wait_for_presence
     def get_attribute(self, attr_name):
         """Get attribute of ui element."""
         return self.webelement.get_attribute(attr_name)
 
     @property
-    @timeit
+    @utils.timeit
     @wait_for_presence
     def value(self):
         """Get value of ui element."""
         return self.webelement.get_attribute('innerHTML').strip()
 
     @property
-    @timeit
+    @utils.timeit
     def is_present(self):
         """Define is ui element present at display."""
         try:
@@ -192,18 +220,19 @@ class UI(object):
             return False
 
     @property
-    @timeit
+    @utils.timeit
     def is_enabled(self):
         """Define is ui element enabled."""
         return self.webelement.is_enabled()
 
     @property
+    @utils.cache
     def webdriver(self):
         """Get webdriver."""
         return self.container.webdriver
 
     @property
-    @cache
+    @utils.cache
     def webelement(self):
         """Get webelement."""
         if self.index:
@@ -217,6 +246,7 @@ class UI(object):
         return WebElementProxy(webelement_getter, ui_info=repr(self))
 
     @property
+    @utils.cache
     def _action_chains(self):
         return ActionChains(self.webdriver)
 
@@ -226,39 +256,39 @@ class UI(object):
                               self.locator[1],
                               index=self.index)
 
-    @timeit
+    @utils.timeit
     def wait_for_presence(self, timeout=None):
         """Wait for ui element presence."""
         timeout = timeout or self.timeout
         try:
-            wait(lambda: self.is_present,
-                 timeout_seconds=timeout, sleep_seconds=0.1)
-        except TimeoutExpired:
-            raise Exception(
+            waiting.wait(lambda: self.is_present,
+                         timeout_seconds=timeout, sleep_seconds=0.1)
+        except waiting.TimeoutExpired:
+            raise PomError(
                 "{!r} is still absent after {} sec".format(self, timeout))
 
-    @timeit
+    @utils.timeit
     def wait_for_absence(self, timeout=None):
         """Wait for ui element absence."""
         timeout = timeout or self.timeout
         try:
-            wait(lambda: not self.is_present,
-                 timeout_seconds=timeout, sleep_seconds=0.1)
-        except TimeoutExpired:
-            raise Exception(
+            waiting.wait(lambda: not self.is_present,
+                         timeout_seconds=timeout, sleep_seconds=0.1)
+        except waiting.TimeoutExpired:
+            raise PomError(
                 "{!r} is still present after {} sec".format(self, timeout))
 
 
 class Block(UI, Container):
     """UI block is containerable ui element."""
 
-    @timeit
+    @utils.timeit
     @wait_for_presence
     def find_element(self, locator):
         """Find DOM element inside container."""
         return super(Block, self).find_element(locator)
 
-    @timeit
+    @utils.timeit
     @wait_for_presence
     def find_elements(self, locator):
         """Find DOM elements inside container."""
