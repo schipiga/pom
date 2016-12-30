@@ -1,7 +1,7 @@
 """
-POM base classes.
-
-@author: chipiga86@gmail.com
+----------------
+POM base classes
+----------------
 """
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -69,21 +69,27 @@ def register_pages(pages):
 
 
 class App(object):
-    """Web application."""
+    """Web application.
+
+    Args:
+        url (str): URL of web application.
+        browser (str): Name of browser to launch.
+        *args: Selenium arguments.
+        **kwgs: Selenium keyword arguments.
+    """
 
     _registered_pages = []
 
     def __init__(self, url, browser, *args, **kwgs):
-        """Constructor."""
         self.app_url = url.strip('/')
         LOGGER.info('Start {!r} browser'.format(browser))
         self.webdriver = browsers[browser](*args, **kwgs)
 
     def open(self, url):
-        """Open url.
+        """Open web application URL.
 
-        Arguments:
-            - url: string.
+        Args:
+            url (str): URL.
         """
         self.webdriver.get(self.app_url + url)
 
@@ -94,7 +100,14 @@ class App(object):
 
     @property
     def current_page(self):
-        """Define current page"""
+        """Current opened web application page.
+
+        Returns:
+            Page: Current opened page.
+
+        Raises:
+            PomError: If current page is not defined.
+        """
         current_url = self.webdriver.current_url
         for page in self._registered_pages:
             if re.match(self.app_url + page.url, current_url):
@@ -104,44 +117,53 @@ class App(object):
 
 
 class Page(ui.Container):
-    """Page of web application."""
+    """Page of web application.
+
+    Args:
+        app (App): Web application.
+    """
 
     url = None
 
     def __init__(self, app):
-        """Constructor."""
         self.app = app
         self.webdriver = self.webelement = app.webdriver
 
-    @utils.timeit
+    @utils.log
     def refresh(self):
         """Refresh page."""
         self.webdriver.refresh()
 
-    @utils.timeit
+    @utils.log
     def open(self):
         """Open page."""
         self.app.open(self.url)
 
-    @utils.timeit
+    @utils.log
     def forward(self):
         """Forward."""
         self.webdriver.forward()
 
-    @utils.timeit
+    @utils.log
     def back(self):
         """Back."""
         self.webdriver.back()
 
     @property
-    @utils.timeit
+    @utils.log
     def source(self):
         """Page source code."""
         return self.webdriver.page_source
 
-    @utils.timeit
+    @utils.log
     def exec_js(self, js_code, async=False):
-        """Execute javascript code."""
+        """Execute javascript code.
+
+        Args:
+            js_code (str): Valid javascript code.
+            async (bool, optional): Flag to execute javascript code
+                asynchronously or not. Defaults to ``False``.
+        """
         if async:
             self.webdriver.execute_async_script(js_code)
         else:

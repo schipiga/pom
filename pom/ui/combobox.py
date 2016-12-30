@@ -1,7 +1,7 @@
 """
-POM combobox.
-
-@author: chipiga86@gmail.com
+------------
+POM combobox
+------------
 """
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,14 +20,18 @@ POM combobox.
 from selenium.webdriver.support.ui import Select
 
 from .base import UI, wait_for_presence
-from ..utils import timeit
+from ..utils import log
+
+__all__ = [
+    'ComboBox',
+]
 
 
 class ComboBox(UI):
     """Combobox."""
 
     @property
-    @timeit
+    @log
     @wait_for_presence
     def value(self):
         """Combobox value."""
@@ -35,7 +39,7 @@ class ComboBox(UI):
             .get_attribute('innerHTML').strip()
 
     @value.setter
-    @timeit
+    @log
     @wait_for_presence
     def value(self, value):
         """Set combobox value."""
@@ -52,7 +56,7 @@ class ComboBox(UI):
         self._select.select_by_index(i)
 
     @property
-    @timeit
+    @log
     @wait_for_presence
     def values(self):
         """Combobox values."""

@@ -1,7 +1,7 @@
 """
------------------
-Page Object Model
------------------
+-----------
+POM version
+-----------
 """
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,15 +17,8 @@ Page Object Model
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .base import App, Page, register_pages
-from .exceptions import PomError
-from .version import VERSION
-
-
 __all__ = [
-    'App',
-    'Page',
-    'PomError',
-    'register_pages',
     'VERSION',
 ]
+
+VERSION = '2.0'

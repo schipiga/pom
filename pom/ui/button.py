@@ -1,7 +1,7 @@
 """
-POM button.
-
-@author: chipiga86@gmail.com
+----------
+POM button
+----------
 """
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,10 @@ POM button.
 # limitations under the License.
 
 from .base import UI
+
+__all__ = [
+    'Button',
+]
 
 
 class Button(UI):

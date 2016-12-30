@@ -1,7 +1,7 @@
 """
-Base UI element.
-
-@author: chipiga86@gmail.com
+---------------
+Base UI element
+---------------
 """
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -179,39 +179,39 @@ class UI(object):
         """Set container of webelement."""
         self._container = container
 
-    @utils.timeit
+    @utils.log
     @wait_for_presence
     def click(self):
         """Click ui element."""
         self.webelement.click()
 
-    @utils.timeit
+    @utils.log
     @wait_for_presence
     def right_click(self):
         """Right click ui element."""
         self._action_chains.context_click(self.webelement).perform()
 
-    @utils.timeit
+    @utils.log
     @wait_for_presence
     def double_click(self):
         """Double click ui element."""
         self._action_chains.double_click(self.webelement).perform()
 
-    @utils.timeit
+    @utils.log
     @wait_for_presence
     def get_attribute(self, attr_name):
         """Get attribute of ui element."""
         return self.webelement.get_attribute(attr_name)
 
     @property
-    @utils.timeit
+    @utils.log
     @wait_for_presence
     def value(self):
         """Get value of ui element."""
         return self.webelement.get_attribute('innerHTML').strip()
 
     @property
-    @utils.timeit
+    @utils.log
     def is_present(self):
         """Define is ui element present at display."""
         try:
@@ -220,7 +220,7 @@ class UI(object):
             return False
 
     @property
-    @utils.timeit
+    @utils.log
     def is_enabled(self):
         """Define is ui element enabled."""
         return self.webelement.is_enabled()
@@ -256,7 +256,7 @@ class UI(object):
                               self.locator[1],
                               index=self.index)
 
-    @utils.timeit
+    @utils.log
     def wait_for_presence(self, timeout=None):
         """Wait for ui element presence."""
         timeout = timeout or self.timeout
@@ -267,7 +267,7 @@ class UI(object):
             raise PomError(
                 "{!r} is still absent after {} sec".format(self, timeout))
 
-    @utils.timeit
+    @utils.log
     def wait_for_absence(self, timeout=None):
         """Wait for ui element absence."""
         timeout = timeout or self.timeout
@@ -282,13 +282,13 @@ class UI(object):
 class Block(UI, Container):
     """UI block is containerable ui element."""
 
-    @utils.timeit
+    @utils.log
     @wait_for_presence
     def find_element(self, locator):
         """Find DOM element inside container."""
         return super(Block, self).find_element(locator)
 
-    @utils.timeit
+    @utils.log
     @wait_for_presence
     def find_elements(self, locator):
         """Find DOM elements inside container."""

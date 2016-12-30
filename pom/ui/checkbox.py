@@ -1,7 +1,7 @@
 """
-POM checkbox.
-
-@author: chipiga86@gmail.com
+------------
+POM checkbox
+------------
 """
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,20 +18,24 @@ POM checkbox.
 # limitations under the License.
 
 from .base import UI, wait_for_presence
-from ..utils import timeit
+from ..utils import log
+
+__all__ = [
+    'CheckBox',
+]
 
 
 class CheckBox(UI):
     """Checkbox."""
 
     @property
-    @timeit
+    @log
     @wait_for_presence
     def is_selected(self):
         """Define is checkbox selected."""
         return self.webelement.is_selected()
 
-    @timeit
+    @log
     @wait_for_presence
     def select(self):
         """Select checkbox if it isn't selected."""

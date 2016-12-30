@@ -1,7 +1,7 @@
 """
-POM form block.
-
-@author: chipiga86@gmail.com
+--------
+POM form
+--------
 """
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,13 +18,17 @@ POM form block.
 # limitations under the License.
 
 from .base import Block, wait_for_presence
-from ..utils import timeit
+from ..utils import log
+
+__all__ = [
+    'Form',
+]
 
 
 class Form(Block):
     """Form."""
 
-    @timeit
+    @log
     @wait_for_presence
     def submit(self):
         """Submit form."""

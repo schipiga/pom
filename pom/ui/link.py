@@ -1,7 +1,7 @@
 """
-POM link.
-
-@author: chipiga86@gmail.com
+--------
+POM link
+--------
 """
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,14 +18,18 @@ POM link.
 # limitations under the License.
 
 from .base import UI, wait_for_presence
-from ..utils import timeit
+from ..utils import log
+
+__all__ = [
+    'Link',
+]
 
 
 class Link(UI):
     """Link."""
 
     @property
-    @timeit
+    @log
     @wait_for_presence
     def href(self):
         """URL of link."""

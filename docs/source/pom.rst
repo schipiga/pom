@@ -1,0 +1,6 @@
+===
+POM
+===
+
+.. automodule:: pom
+    :members:

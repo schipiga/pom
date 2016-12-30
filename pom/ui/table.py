@@ -1,7 +1,7 @@
 """
-POM table block.
-
-@author: chipiga86@gmail.com
+---------
+POM table
+---------
 """
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +20,16 @@ POM table block.
 from selenium.webdriver.common.by import By
 
 from .base import Block, register_ui
-from ..utils import timeit, cache
+from ..utils import log, cache
+
+__all__ = [
+    'Row',
+    'Header',
+    'Body',
+    'Footer',
+    'Table',
+    'List',
+]
 
 
 def _merge_xpath(xpath, attr):
@@ -33,7 +42,7 @@ def _merge_xpath(xpath, attr):
 class _CellsMixin(object):
 
     @property
-    @timeit
+    @log
     def cells(self):
         locator = By.XPATH, self.cell_xpath
         _cells = []
@@ -60,7 +69,7 @@ class _CellsMixin(object):
 class _RowsMixin(object):
 
     @property
-    @timeit
+    @log
     def rows(self):
         """Visible rows."""
         locator = By.XPATH, self.row_xpath

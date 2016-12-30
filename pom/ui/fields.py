@@ -1,7 +1,7 @@
 """
-POM Fields.
-
-@author: chipiga86@gmail.com
+----------
+POM Fields
+----------
 """
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,27 +18,33 @@ POM Fields.
 # limitations under the License.
 
 from .base import UI, wait_for_presence
-from ..utils import timeit
+from ..utils import log
+
+__all__ = [
+    'TextField',
+    'IntegerField',
+    'FileField',
+]
 
 
 class TextField(UI):
     """Text field."""
 
     @property
-    @timeit
+    @log
     @wait_for_presence
     def value(self):
         """Value of text field."""
         return self.webelement.text or self.webelement.get_attribute('value')
 
-    @timeit
+    @log
     @wait_for_presence
     def set_value(self, text):
         """Set value of text field."""
         self.webelement.clear()
         self.webelement.send_keys(text)
 
-    @timeit
+    @log
     @wait_for_presence
     def add_value(self, text):
         """Add value to current."""
@@ -49,7 +55,7 @@ class IntegerField(TextField):
     """Integer field."""
 
     @property
-    @timeit
+    @log
     @wait_for_presence
     def value(self):
         """Value of integer field."""
@@ -60,7 +66,7 @@ class FileField(TextField):
     """File field."""
 
     @property
-    @timeit
+    @log
     @wait_for_presence
     def value(self):
         """Value of text field."""
