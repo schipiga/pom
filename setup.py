@@ -21,7 +21,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='python-pom',
-    version='1.0.2',
+    version='1.0.3',
     description=('POM is Page-Object-Model microframework to develop web UI '
                  'tests easy, quickly and with pleasure.'),
     long_description=open('readme.rst').read(),
