@@ -20,7 +20,7 @@ POM table block.
 from selenium.webdriver.common.by import By
 
 from .base import Block, register_ui
-from ..utils import timeit, cache
+from ..utils import timeit
 
 
 def _merge_xpath(xpath, attr):
@@ -94,19 +94,16 @@ class Body(Block, _RowsMixin):
     """Table body."""
 
     @property
-    @cache
     def row_cls(self):
         """Row table class."""
         return self.container.row_cls
 
     @property
-    @cache
     def row_xpath(self):
         """Row xpath."""
         return self.container.row_xpath
 
     @property
-    @cache
     def columns(self):
         """Table columns."""
         return self.container.columns
