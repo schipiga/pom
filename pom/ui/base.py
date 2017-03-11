@@ -175,6 +175,13 @@ class UI(object):
         """Get attribute of ui element."""
         return self.webelement.get_attribute(attr_name)
 
+    @timeit
+    @wait_for_presence
+    def scroll_to(self):
+        """Scroll window to ui element."""
+        self.webdriver.execute_script(
+            "window.scroll({x}, {y});".format(**self.webelement.location))
+
     @property
     @timeit
     @wait_for_presence

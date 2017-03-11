@@ -17,6 +17,7 @@ POM combobox.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from selenium.common import exceptions
 from selenium.webdriver.support.ui import Select
 
 from .base import UI, wait_for_presence
@@ -31,8 +32,14 @@ class ComboBox(UI):
     @wait_for_presence
     def value(self):
         """Combobox value."""
-        return self._select.first_selected_option \
-            .get_attribute('innerHTML').strip()
+        try:
+            return self._select.first_selected_option \
+                .get_attribute('innerHTML').strip()
+        except exceptions.NoSuchElementException as e:
+            if e.msg == 'No options are selected':
+                return ''
+            else:
+                raise
 
     @value.setter
     @timeit
