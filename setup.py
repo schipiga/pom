@@ -21,7 +21,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='python-pom',
-    version='1.0.4',
+    version='1.0.5',
     description=('POM is Page-Object-Model microframework to develop web UI '
                  'tests easy, quickly and with pleasure.'),
     long_description=open('readme.rst').read(),
@@ -33,5 +33,6 @@ setup(
     install_requires=[
         'selenium==3.3.0',
         'waiting==1.3.0',
+        'six==1.11.0',
     ]
 )

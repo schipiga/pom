@@ -19,6 +19,7 @@ Base UI element.
 
 import functools
 import logging
+import six
 
 from selenium.common import exceptions
 from selenium.webdriver import ActionChains
@@ -60,7 +61,7 @@ class Container(object):
         Sets ui elements as cached properties. Inside property it clones ui
         element to provide safe-thread execution.
         """
-        for ui_name, ui_obj in ui.iteritems():
+        for ui_name, ui_obj in six.iteritems(ui):
 
             def ui_getter(self, ui_obj=ui_obj):
                 ui_clone = ui_obj.clone()

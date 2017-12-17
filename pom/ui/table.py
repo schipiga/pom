@@ -17,6 +17,8 @@ POM table block.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import six
+
 from selenium.webdriver.common.by import By
 
 from .base import Block, register_ui
@@ -118,7 +120,7 @@ class Body(Block, _RowsMixin):
         pos_tmpl = 'position()={} and contains(., "{}")'
         cell_selectors = []
 
-        for name, value in kwgs.items():
+        for name, value in six.iteritems(kwgs):
             position = self.columns[name]
             cell_xpath = _merge_xpath(self.row_cls.cell_xpath,
                                       pos_tmpl.format(position, value))
