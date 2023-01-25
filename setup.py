@@ -31,8 +31,8 @@ setup(
     packages=find_packages(),
     url='https://github.com/sergeychipiga/pom',
     install_requires=[
-        'selenium==3.3.0',
-        'waiting==1.3.0',
-        'six==1.11.0',
+        'selenium>=3.3.0',
+        'waiting>=1.3.0',
+        'six>=1.11.0',
     ]
 )

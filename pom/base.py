@@ -34,9 +34,9 @@ __all__ = [
 LOGGER = logging.getLogger(__name__)
 
 browsers = {
-    'firefox': webdriver.Firefox,
-    'phantom': webdriver.PhantomJS,
-    'Chrome': webdriver.Chrome,
+    'firefox': "Firefox",
+    'phantom': "PhantomJS",
+    'Chrome': "Chrome",
 }
 
 
@@ -78,7 +78,7 @@ class App(object):
         """Constructor."""
         self.app_url = url.strip('/')
         LOGGER.info('Start {!r} browser'.format(browser))
-        self.webdriver = browsers[browser](*args, **kwgs)
+        self.webdriver = getattr(webdriver, browsers[browser])(*args, **kwgs)
 
     def open(self, url):
         """Open url.
